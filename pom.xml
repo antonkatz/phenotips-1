@@ -255,6 +255,11 @@
               <from>org.phenotips.solr.HPOScriptService</from>
               <to>org.phenotips.ontology.OntologyService</to>
             </difference>
+            <difference>
+              <className>**/groups/Group</className>
+              <differenceType>7012</differenceType>
+              <method>void addMembershipApplicant(org.xwiki.users.User, com.xpn.xwiki.XWikiContext)</method>
+            </difference>
           </ignored>
           <excludes>
             <exclude>**/internal/**</exclude>

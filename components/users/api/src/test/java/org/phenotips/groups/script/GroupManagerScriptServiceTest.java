@@ -24,22 +24,28 @@ import org.phenotips.groups.GroupManager;
 import org.phenotips.groups.script.GroupManagerScriptService;
 
 import org.xwiki.component.manager.ComponentLookupException;
+import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.test.mockito.MockitoComponentMockingRule;
 import org.xwiki.users.User;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import javax.swing.text.Document;
+
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+
+import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * Tests for the {@link GroupManager} script service, {@link GroupManagerScriptService}.
- * 
+ *
  * @version $Id$
  */
 public class GroupManagerScriptServiceTest
@@ -68,5 +74,28 @@ public class GroupManagerScriptServiceTest
         GroupManager manager = this.mocker.getInstance(GroupManager.class);
         when(manager.getGroupsForUser(user)).thenThrow(new NullPointerException());
         Assert.assertTrue(this.mocker.getComponentUnderTest().getGroupsForUser(user).isEmpty());
+    }
+
+    @Test
+    public void addApplicantWithNullGroup() throws ComponentLookupException
+    {
+        User user = mock(User.class);
+        DocumentReference groupName = mock(DocumentReference.class);
+        XWikiContext context = mock(XWikiContext.class);
+        GroupManager manager = this.mocker.getInstance(GroupManager.class);
+        when(manager.getGroup(groupName)).thenThrow(new NullPointerException());
+        Assert.assertTrue(this.mocker.getComponentUnderTest().addApplicant(user, groupName, context) == 0);
+    }
+
+    @Test
+    public void addApplicant() throws ComponentLookupException
+    {
+        User user = mock(User.class);
+        DocumentReference groupName = mock(DocumentReference.class);
+        XWikiContext context = mock(XWikiContext.class);
+        Group group = mock(Group.class);
+        GroupManager manager = this.mocker.getInstance(GroupManager.class);
+        when(manager.getGroup(groupName)).thenReturn(group);
+        Assert.assertTrue(this.mocker.getComponentUnderTest().addApplicant(user, groupName, context) == 1);
     }
 }

@@ -53,4 +53,16 @@ public class DefaultGroupTest
         DocumentReference a = new DocumentReference("xwiki", "Groups", "Group A");
         Assert.assertTrue(new DefaultGroup(a).toString().contains("Group A"));
     }
+//
+//    @Test
+//    public void addMemebershipApplicant() throws Exception
+//    {
+//        DocumentReference a = new DocumentReference("xwiki", "Groups", "Group A");
+//        DefaultGroup g = new DefaultGroup(a);
+//        User user = mock(User.class);
+//        XWikiDocument doc = mock(XWikiDocument.class);
+//        DocumentModelBridge context = mock(DocumentModelBridge.class);
+//        Mockito.when(g.getDocument()).thenReturn(doc);
+//        g.addMembershipApplicant(user, context);
+//    }
 }

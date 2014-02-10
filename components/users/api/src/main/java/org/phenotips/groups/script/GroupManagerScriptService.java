@@ -23,6 +23,7 @@ import org.phenotips.groups.Group;
 import org.phenotips.groups.GroupManager;
 
 import org.xwiki.component.annotation.Component;
+import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.script.service.ScriptService;
 import org.xwiki.stability.Unstable;
 import org.xwiki.users.User;
@@ -34,9 +35,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import com.xpn.xwiki.XWikiContext;
+
 /**
  * Service for manipulating groups.
- * 
+ *
  * @version $Id$
  * @since 1.0M9
  */
@@ -52,7 +55,7 @@ public class GroupManagerScriptService implements ScriptService
 
     /**
      * List the groups that this user is a member of.
-     * 
+     *
      * @param user the user whose groups will be retrieved
      * @return an unmodifiable set of groups, empty if the user isn't part of any groups.
      */
@@ -62,6 +65,28 @@ public class GroupManagerScriptService implements ScriptService
             return this.manager.getGroupsForUser(user);
         } catch (Exception ex) {
             return Collections.emptySet();
+        }
+    }
+
+    /**
+     * Add the user as a membership applicant for the group.
+     *
+     * @param user current user
+     * @param groupReference the document reference of the group
+     * @param context required for some xwiki functions
+     * @return code {@code 1} for success or {@code 0} for failure
+     */
+    public int addApplicant(User user, DocumentReference groupReference, XWikiContext context)
+    {
+        try {
+            Group group = manager.getGroup(groupReference);
+            if (group == null) {
+                return 0;
+            }
+            group.addMembershipApplicant(user, context);
+            return 1;
+        } catch (Exception ex) {
+            return 0;
         }
     }
 }

@@ -25,10 +25,13 @@ import org.xwiki.model.EntityType;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
 import org.xwiki.stability.Unstable;
+import org.xwiki.users.User;
+
+import com.xpn.xwiki.XWikiContext;
 
 /**
  * A group of users.
- * 
+ *
  * @version $Id$
  * @since 1.0M9
  */
@@ -38,11 +41,24 @@ public interface Group
     /** The XClass used for storing work groups. */
     EntityReference CLASS_REFERENCE = new EntityReference("PhenoTipsGroupClass", EntityType.DOCUMENT,
         Constants.CODE_SPACE_REFERENCE);
+    /** The XClass used for storing individual applicant data. */
+    EntityReference APPLICANT_REFERENCE = new EntityReference("PhenoTipsGroupApplicant",
+        EntityType.DOCUMENT, Constants.CODE_SPACE_REFERENCE);
 
     /**
      * Get a reference to the XDocument where this group is defined.
-     * 
+     *
      * @return a valid document reference
      */
     DocumentReference getReference();
+
+    /**
+     * Does it need to check for belonging to the group already? There will be no apply button show if the user belongs
+     * to the group already: not secure, but security is not needed.
+     *
+     * @param user holds user data
+     * @param context used to create new xobjects
+     * @throws java.lang.Exception if the user has already applied for membership
+     */
+    void addMembershipApplicant(User user, XWikiContext context) throws Exception;
 }

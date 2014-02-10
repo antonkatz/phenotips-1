@@ -22,10 +22,15 @@ package org.phenotips.groups.internal;
 import org.phenotips.groups.Group;
 
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.users.User;
+
+import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.objects.BaseObject;
 
 /**
  * Default implementation for {@link Group}.
- * 
+ *
  * @version $Id$
  * @since 1.0M9
  */
@@ -36,7 +41,7 @@ public class DefaultGroup implements Group
 
     /**
      * Simple constructor.
-     * 
+     *
      * @param reference the reference to the document where this group is defined
      */
     public DefaultGroup(DocumentReference reference)
@@ -54,5 +59,17 @@ public class DefaultGroup implements Group
     public String toString()
     {
         return "Group " + getReference().getName();
+    }
+
+    @Override
+    public void addMembershipApplicant(User user, XWikiContext context) throws Exception
+    {
+        XWikiDocument groupDoc = context.getDoc();
+//        if (group.getXObjects(Group.APPLICANT_REFERENCE) == null) {
+//
+//        }
+        BaseObject applicant = groupDoc.newXObject(Group.APPLICANT_REFERENCE, context);
+        applicant.set("userId", user.getId(), context);
+        groupDoc.addXObject(applicant);
     }
 }
