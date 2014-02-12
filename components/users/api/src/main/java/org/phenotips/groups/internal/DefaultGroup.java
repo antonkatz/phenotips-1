@@ -21,8 +21,6 @@ package org.phenotips.groups.internal;
 
 import org.phenotips.groups.Group;
 
-import org.xwiki.bridge.DocumentAccessBridge;
-import org.xwiki.component.embed.EmbeddableComponentManager;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.users.User;
 
@@ -72,11 +70,7 @@ public class DefaultGroup implements Group
     @Override
     public void addMembershipApplicant(User user, XWikiContext context) throws Exception
     {
-//        XWikiDocument groupDoc = context.getWiki().getDocument(this.reference, context);
-        EmbeddableComponentManager manager = new EmbeddableComponentManager();
-        manager.initialize(this.getClass().getClassLoader());
-        DocumentAccessBridge dab = manager.getInstance(DocumentAccessBridge.class);
-        XWikiDocument groupDoc = (XWikiDocument) dab.getDocument(this.reference);
+        XWikiDocument groupDoc = context.getWiki().getDocument(this.reference, context);
         String userId = user.getId();
         List<BaseObject> applicants = groupDoc.getXObjects(Group.APPLICANT_REFERENCE);
         if (applicants != null) {
@@ -86,9 +80,8 @@ public class DefaultGroup implements Group
                 }
             }
         }
-        groupDoc.createXObject(Group.APPLICANT_REFERENCE, context);
-        BaseObject applicant = groupDoc.getXObject(APPLICANT_REFERENCE);
+        BaseObject applicant = groupDoc.newXObject(Group.APPLICANT_REFERENCE, context);
         applicant.set(USER_ID, userId, context);
-        groupDoc.addXObject(applicant);
+        context.getWiki().saveDocument(groupDoc, context);
     }
 }

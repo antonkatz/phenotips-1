@@ -72,7 +72,7 @@ public class GroupManagerScriptService implements ScriptService
      * Add the user as a membership applicant for the group.
      *
      * @param user current user
-     * @param documentReference BAD JAVADOC
+     * @param documentReference xwiki reference to the document
      * @param context required for some xwiki functions
      * @return code {@code 1} for success or {@code 0} for failure
      */

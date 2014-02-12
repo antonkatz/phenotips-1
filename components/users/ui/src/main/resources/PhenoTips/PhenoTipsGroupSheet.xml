@@ -31,9 +31,9 @@
   <author>xwiki:XWiki.Admin</author>
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <creationDate>1378930776000</creationDate>
-  <date>1379620181000</date>
-  <contentUpdateDate>1379620181000</contentUpdateDate>
+  <creationDate>1391718071000</creationDate>
+  <date>1392239294000</date>
+  <contentUpdateDate>1392239294000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -42,6 +42,38 @@
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
+  <object>
+    <class>
+      <name>PhenoTips.PhenoTipsGroupApplicant</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <userId>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>userId</name>
+        <number>1</number>
+        <picker>0</picker>
+        <prettyName>userId</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </userId>
+    </class>
+    <name>PhenoTips.PhenoTipsGroupSheet</name>
+    <number>0</number>
+    <className>PhenoTips.PhenoTipsGroupApplicant</className>
+    <guid>a0b3077d-222d-44ab-b393-db21a071d0ae</guid>
+    <property>
+      <userId>xwiki:XWiki.Admin</userId>
+    </property>
+  </object>
   <object>
     <class>
       <name>XWiki.StyleSheetExtension</name>
@@ -287,7 +319,39 @@ $xwiki.linkx.use('//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.
 (% class="group-logo" %)(((#if ("$!{doc.getObject('PhenoTips.PhenoTipsGroupClass').getProperty('image').value}" != '')$doc.display('image')#{else}$xwiki.getDocument('PhenoTips.PhenoTipsGroupTemplate').display('image')#{end})))$doc.display('description')
 
 #set ($isMyGroup = $xwiki.user.isUserInGroup($doc.fullName) || $xwiki.user.isUserInGroup("${doc.fullName} Administrators"))
-#if ($isMyGroup){{info}}You are a member of this group.{{/info}}#end
+#if ($isMyGroup){{info}}You are a member of this group.{{/info}}
+(% class="clearfloats" %)((()))
+#end
+
+## ==================================================================
+## This section of code is for users that want to apply for membership.
+## ==================================================================
+#if ($request.get("apply") == 1)
+  #set ($applicationRequestCode = $services.groups.addApplicant($services.users.getCurrentUser(), $doc.getDocument().getDocumentReference(), $xcontext.getContext()))
+  #if ($applicationRequestCode == 1)
+    {{html}}Your application has been successful.{{/html}}
+  #else
+    {{html}}Your application has &lt;b&gt;NOT&lt;/b&gt; been successful.{{/html}}
+  #end
+#else
+  ##Checking if already in the applicants list
+  #set ($applicants = $doc.getObjects("PhenoTips.PhenoTipsGroupApplicant"))
+  #set ($alreadyApplied = 0)
+  #foreach($applicantObject in $applicants)
+    #if ($applicantObject.get("userId"))
+      #set ($alreadyApplied = 1)
+    #end
+  #end
+  
+  #if ($isMyGroup != true)
+    #if ($alreadyApplied == 1)
+      {{html}}You have already applied to become a member of this group{{/html}}
+    #else
+      {{html}}&lt;a href="?apply=1"&gt;Apply to become a member of this group&lt;/a&gt;{{/html}}
+    #end
+  #end
+#end
+
 (% class="clearfloats" %)((()))
 #end
 
@@ -296,7 +360,8 @@ $xwiki.linkx.use('//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.
 #set ($sections = [
   {'id' : 'members', 'name' : "Group members", 'icon' : 'users',       'content' : '{{include reference="XWiki.XWikiGroupSheet"/}}'},
   {'id' : 'cases',   'name' : "Cases",  'icon' : 'folder-open', 'content' : '{{include reference="PhenoTips.GroupCases"/}}'},
-  {'id' : 'form' ,   'name' : "Patient form",  'icon' : 'cogs',        'content' : '{{include reference="PhenoTips.FormDesigner"/}}'}
+  {'id' : 'form' ,   'name' : "Patient form",  'icon' : 'cogs',        'content' : '{{include reference="PhenoTips.FormDesigner"/}}'},
+  {'id' : 'applicants' ,   'name' : "Membership Applicants",  'icon' : 'users',        'content' : '{{include reference="PhenoTips.PhenoTipsApplicantList"/}}'}
 ])
 #set ($menu = [])
 #set ($contents = {})

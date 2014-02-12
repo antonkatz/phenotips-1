@@ -53,8 +53,7 @@ public interface Group
     DocumentReference getReference();
 
     /**
-     * Does it need to check for belonging to the group already? There will be no apply button show if the user belongs
-     * to the group already: not secure, but security is not needed.
+     * Adds an object holding applicant data to the group.
      *
      * @param user holds user data
      * @param context used to create new xobjects
