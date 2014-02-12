@@ -27,6 +27,9 @@ import org.xwiki.model.reference.EntityReference;
 import org.xwiki.query.QueryException;
 import org.xwiki.users.User;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -38,7 +41,7 @@ import com.xpn.xwiki.objects.BaseObject;
 
 /**
  * Tests for the default {@link Group} implementation, {@link DefaultGroup}.
- * 
+ *
  * @version $Id$
  */
 public class DefaultGroupTest
@@ -85,22 +88,32 @@ public class DefaultGroupTest
         g.addMembershipApplicant(user, context);
     }
 
-//    @Test(expected = java.lang.Exception.class)
-//    public void addMemebershipApplicant() throws Exception
-//    {
-//        DocumentReference a = new DocumentReference("xwiki", "Groups", "Group A");
-//        DefaultGroup g = new DefaultGroup(a);
-//        User user = Mockito.mock(User.class);
-//        XWikiContext context = Mockito.mock(XWikiContext.class);
-//        XWiki wiki = Mockito.mock(XWiki.class);
-//        XWikiDocument doc = Mockito.mock(XWikiDocument.class);
-//
-//        Mockito.when(context.getWiki()).thenReturn(wiki);
-//        Mockito.when(wiki.getDocument(Mockito.any(DocumentReference.class), context)).thenReturn(doc);
-//        Mockito.when(user.getId()).thenReturn("id");
-//        Mockito.when(doc.getXObjects(Mockito.any(EntityReference.class)));
-//
-//        g.addMembershipApplicant(user, context);
-//    }
+    @Test(expected = java.lang.Exception.class)
+    public void addMemebershipApplicantNull() throws Exception
+    {
+        DocumentReference a = new DocumentReference("xwiki", "Groups", "Group A");
+        DefaultGroup g = new DefaultGroup(a);
 
+        User user = Mockito.mock(User.class);
+        XWikiContext context = Mockito.mock(XWikiContext.class);
+        XWiki wiki = Mockito.mock(XWiki.class);
+        XWikiDocument doc = Mockito.mock(XWikiDocument.class);
+        BaseObject baseObject = Mockito.mock(BaseObject.class);
+        @SuppressWarnings( "unchecked" )
+        List<BaseObject> appList = Mockito.mock(List.class);
+        @SuppressWarnings( "unchecked" )
+        Iterator<BaseObject> appListI = Mockito.mock(Iterator.class);
+        String userId = "id";
+
+        Mockito.when(context.getWiki()).thenReturn(wiki);
+        Mockito.when(wiki.getDocument(a, context)).thenReturn(doc);
+        Mockito.when(user.getId()).thenReturn(userId);
+        Mockito.when(doc.getXObjects(Mockito.any(EntityReference.class))).thenReturn(appList);
+        Mockito.when(appList.iterator()).thenReturn(appListI);
+        Mockito.when(appListI.hasNext()).thenReturn(true, false);
+        Mockito.when(appListI.next()).thenReturn(baseObject);
+        Mockito.when(baseObject.getStringValue(Mockito.anyString())).thenReturn(userId);
+
+        g.addMembershipApplicant(user, context);
+    }
 }

@@ -76,6 +76,7 @@ public class DefaultGroup implements Group
         if (applicants != null) {
             for (BaseObject applicant : applicants) {
                 if (StringUtils.equalsIgnoreCase(userId, applicant.getStringValue(USER_ID))) {
+                    //TODO Change to a narrower exception
                     throw new Exception("The user is already in the applicants list");
                 }
             }
