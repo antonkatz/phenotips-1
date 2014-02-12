@@ -23,10 +23,18 @@ import org.phenotips.groups.Group;
 
 import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReference;
 import org.xwiki.query.QueryException;
+import org.xwiki.users.User;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
+
+import com.xpn.xwiki.XWiki;
+import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.doc.XWikiDocument;
+import com.xpn.xwiki.objects.BaseObject;
 
 /**
  * Tests for the default {@link Group} implementation, {@link DefaultGroup}.
@@ -53,16 +61,46 @@ public class DefaultGroupTest
         DocumentReference a = new DocumentReference("xwiki", "Groups", "Group A");
         Assert.assertTrue(new DefaultGroup(a).toString().contains("Group A"));
     }
-//
-//    @Test
+
+    @Test
+    public void addMemebershipApplicant() throws Exception
+    {
+        DocumentReference a = new DocumentReference("xwiki", "Groups", "Group A");
+        DefaultGroup g = new DefaultGroup(a);
+
+        User user = Mockito.mock(User.class);
+        XWikiContext context = Mockito.mock(XWikiContext.class);
+        XWiki wiki = Mockito.mock(XWiki.class);
+        XWikiDocument doc = Mockito.mock(XWikiDocument.class);
+        BaseObject baseObject = Mockito.mock(BaseObject.class);
+
+        Mockito.when(context.getWiki()).thenReturn(wiki);
+        Mockito.when(wiki.getDocument(Mockito.any(DocumentReference.class),
+            Mockito.any(XWikiContext.class))).thenReturn(doc);
+        Mockito.when(doc.getXObjects(Mockito.any(EntityReference.class))).thenReturn(null);
+        Mockito.when(doc.newXObject(Mockito.any(EntityReference.class), Mockito.any(XWikiContext.class)))
+            .thenReturn(baseObject);
+        Mockito.doNothing().when(wiki).saveDocument(doc, context);
+
+        g.addMembershipApplicant(user, context);
+    }
+
+//    @Test(expected = java.lang.Exception.class)
 //    public void addMemebershipApplicant() throws Exception
 //    {
 //        DocumentReference a = new DocumentReference("xwiki", "Groups", "Group A");
 //        DefaultGroup g = new DefaultGroup(a);
-//        User user = mock(User.class);
-//        XWikiDocument doc = mock(XWikiDocument.class);
-//        DocumentModelBridge context = mock(DocumentModelBridge.class);
-//        Mockito.when(g.getDocument()).thenReturn(doc);
+//        User user = Mockito.mock(User.class);
+//        XWikiContext context = Mockito.mock(XWikiContext.class);
+//        XWiki wiki = Mockito.mock(XWiki.class);
+//        XWikiDocument doc = Mockito.mock(XWikiDocument.class);
+//
+//        Mockito.when(context.getWiki()).thenReturn(wiki);
+//        Mockito.when(wiki.getDocument(Mockito.any(DocumentReference.class), context)).thenReturn(doc);
+//        Mockito.when(user.getId()).thenReturn("id");
+//        Mockito.when(doc.getXObjects(Mockito.any(EntityReference.class)));
+//
 //        g.addMembershipApplicant(user, context);
 //    }
+
 }
