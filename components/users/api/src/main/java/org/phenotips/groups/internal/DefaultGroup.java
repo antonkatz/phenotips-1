@@ -21,8 +21,14 @@ package org.phenotips.groups.internal;
 
 import org.phenotips.groups.Group;
 
+import org.xwiki.bridge.DocumentAccessBridge;
+import org.xwiki.component.embed.EmbeddableComponentManager;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.users.User;
+
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -36,6 +42,8 @@ import com.xpn.xwiki.objects.BaseObject;
  */
 public class DefaultGroup implements Group
 {
+    private static final String USER_ID = "userId";
+
     /** @see #getReference() */
     private final DocumentReference reference;
 
@@ -64,12 +72,23 @@ public class DefaultGroup implements Group
     @Override
     public void addMembershipApplicant(User user, XWikiContext context) throws Exception
     {
-        XWikiDocument groupDoc = context.getDoc();
-//        if (group.getXObjects(Group.APPLICANT_REFERENCE) == null) {
-//
-//        }
-        BaseObject applicant = groupDoc.newXObject(Group.APPLICANT_REFERENCE, context);
-        applicant.set("userId", user.getId(), context);
+//        XWikiDocument groupDoc = context.getWiki().getDocument(this.reference, context);
+        EmbeddableComponentManager manager = new EmbeddableComponentManager();
+        manager.initialize(this.getClass().getClassLoader());
+        DocumentAccessBridge dab = manager.getInstance(DocumentAccessBridge.class);
+        XWikiDocument groupDoc = (XWikiDocument) dab.getDocument(this.reference);
+        String userId = user.getId();
+        List<BaseObject> applicants = groupDoc.getXObjects(Group.APPLICANT_REFERENCE);
+        if (applicants != null) {
+            for (BaseObject applicant : applicants) {
+                if (StringUtils.equalsIgnoreCase(userId, applicant.getStringValue(USER_ID))) {
+                    throw new Exception("The user is already in the applicants list");
+                }
+            }
+        }
+        groupDoc.createXObject(Group.APPLICANT_REFERENCE, context);
+        BaseObject applicant = groupDoc.getXObject(APPLICANT_REFERENCE);
+        applicant.set(USER_ID, userId, context);
         groupDoc.addXObject(applicant);
     }
 }

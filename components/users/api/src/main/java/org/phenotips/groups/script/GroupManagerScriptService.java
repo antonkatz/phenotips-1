@@ -72,17 +72,14 @@ public class GroupManagerScriptService implements ScriptService
      * Add the user as a membership applicant for the group.
      *
      * @param user current user
-     * @param groupReference the document reference of the group
+     * @param documentReference BAD JAVADOC
      * @param context required for some xwiki functions
      * @return code {@code 1} for success or {@code 0} for failure
      */
-    public int addApplicant(User user, DocumentReference groupReference, XWikiContext context)
+    public int addApplicant(User user, DocumentReference documentReference, XWikiContext context)
     {
         try {
-            Group group = manager.getGroup(groupReference);
-            if (group == null) {
-                return 0;
-            }
+            Group group = manager.getGroup(documentReference);
             group.addMembershipApplicant(user, context);
             return 1;
         } catch (Exception ex) {
