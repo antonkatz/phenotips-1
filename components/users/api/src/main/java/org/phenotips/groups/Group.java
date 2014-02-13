@@ -57,7 +57,7 @@ public interface Group
      *
      * @param user holds user data
      * @param context used to create new xobjects
-     * @throws java.lang.Exception if the user has already applied for membership
+     * @return {@code 1} for success or {@code 0} for failure
      */
-    void addMembershipApplicant(User user, XWikiContext context) throws Exception;
+    int addMembershipApplicant(User user, XWikiContext context);
 }

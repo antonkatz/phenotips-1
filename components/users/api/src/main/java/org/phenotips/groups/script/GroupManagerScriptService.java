@@ -78,11 +78,10 @@ public class GroupManagerScriptService implements ScriptService
      */
     public int addApplicant(User user, DocumentReference documentReference, XWikiContext context)
     {
-        try {
-            Group group = manager.getGroup(documentReference);
-            group.addMembershipApplicant(user, context);
-            return 1;
-        } catch (Exception ex) {
+        Group group = manager.getGroup(documentReference);
+        if (group != null) {
+            return group.addMembershipApplicant(user, context);
+        } else {
             return 0;
         }
     }

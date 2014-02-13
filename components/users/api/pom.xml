@@ -129,7 +129,7 @@
               <limits>
                 <limit>
                   <counter>INSTRUCTION</counter>
-                  <minimum>0.80</minimum>
+                  <minimum>1.0</minimum>
                 </limit>
               </limits>
             </rule>

@@ -29,6 +29,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
@@ -68,21 +69,25 @@ public class DefaultGroup implements Group
     }
 
     @Override
-    public void addMembershipApplicant(User user, XWikiContext context) throws Exception
+    public int addMembershipApplicant(User user, XWikiContext context)
     {
-        XWikiDocument groupDoc = context.getWiki().getDocument(this.reference, context);
-        String userId = user.getId();
-        List<BaseObject> applicants = groupDoc.getXObjects(Group.APPLICANT_REFERENCE);
-        if (applicants != null) {
-            for (BaseObject applicant : applicants) {
-                if (StringUtils.equalsIgnoreCase(userId, applicant.getStringValue(USER_ID))) {
-                    //TODO Change to a narrower exception
-                    throw new Exception("The user is already in the applicants list");
+        try {
+            XWikiDocument groupDoc = context.getWiki().getDocument(this.reference, context);
+            String userId = user.getId();
+            List<BaseObject> applicants = groupDoc.getXObjects(Group.APPLICANT_REFERENCE);
+            if (applicants != null) {
+                for (BaseObject applicant : applicants) {
+                    if (StringUtils.equalsIgnoreCase(userId, applicant.getStringValue(USER_ID))) {
+                        return 0;
+                    }
                 }
             }
+            BaseObject applicant = groupDoc.newXObject(Group.APPLICANT_REFERENCE, context);
+            applicant.set(USER_ID, userId, context);
+            context.getWiki().saveDocument(groupDoc, context);
+            return 1;
+        } catch (XWikiException ex) {
+            return 0;
         }
-        BaseObject applicant = groupDoc.newXObject(Group.APPLICANT_REFERENCE, context);
-        applicant.set(USER_ID, userId, context);
-        context.getWiki().saveDocument(groupDoc, context);
     }
 }

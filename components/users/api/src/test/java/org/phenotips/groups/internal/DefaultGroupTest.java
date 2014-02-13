@@ -36,6 +36,7 @@ import org.mockito.Mockito;
 
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 
@@ -66,7 +67,7 @@ public class DefaultGroupTest
     }
 
     @Test
-    public void addMemebershipApplicant() throws Exception
+    public void addMemebershipApplicantNull() throws XWikiException
     {
         DocumentReference a = new DocumentReference("xwiki", "Groups", "Group A");
         DefaultGroup g = new DefaultGroup(a);
@@ -85,11 +86,15 @@ public class DefaultGroupTest
             .thenReturn(baseObject);
         Mockito.doNothing().when(wiki).saveDocument(doc, context);
 
-        g.addMembershipApplicant(user, context);
+        Assert.assertTrue(g.addMembershipApplicant(user, context) == 1);
+        Mockito.verify(context, Mockito.atLeast(2)).getWiki();
+        Mockito.verify(wiki, Mockito.atLeastOnce()).getDocument(Mockito.any(DocumentReference.class),
+            Mockito.any(XWikiContext.class));
+        Mockito.verify(wiki, Mockito.atLeastOnce()).saveDocument(doc, context);
     }
 
-    @Test(expected = java.lang.Exception.class)
-    public void addMemebershipApplicantNull() throws Exception
+    @Test
+    public void addMemebershipApplicantExists() throws XWikiException
     {
         DocumentReference a = new DocumentReference("xwiki", "Groups", "Group A");
         DefaultGroup g = new DefaultGroup(a);
@@ -114,6 +119,39 @@ public class DefaultGroupTest
         Mockito.when(appListI.next()).thenReturn(baseObject);
         Mockito.when(baseObject.getStringValue(Mockito.anyString())).thenReturn(userId);
 
-        g.addMembershipApplicant(user, context);
+        Assert.assertTrue(g.addMembershipApplicant(user, context) == 0);
+    }
+
+    @Test
+    public void addMemebershipApplicantDoesNotExist() throws XWikiException
+    {
+        DocumentReference a = new DocumentReference("xwiki", "Groups", "Group A");
+        DefaultGroup g = new DefaultGroup(a);
+
+        User user = Mockito.mock(User.class);
+        XWikiContext context = Mockito.mock(XWikiContext.class);
+        XWiki wiki = Mockito.mock(XWiki.class);
+        XWikiDocument doc = Mockito.mock(XWikiDocument.class);
+        BaseObject baseObject = Mockito.mock(BaseObject.class);
+        @SuppressWarnings( "unchecked" )
+        List<BaseObject> appList = Mockito.mock(List.class);
+        @SuppressWarnings( "unchecked" )
+        Iterator<BaseObject> appListI = Mockito.mock(Iterator.class);
+        String userId = "id";
+
+        Mockito.when(context.getWiki()).thenReturn(wiki);
+        Mockito.when(wiki.getDocument(a, context)).thenReturn(doc);
+        Mockito.when(user.getId()).thenReturn(userId);
+        Mockito.when(doc.getXObjects(Mockito.any(EntityReference.class))).thenReturn(appList);
+        Mockito.when(appList.iterator()).thenReturn(appListI);
+        Mockito.when(appListI.hasNext()).thenReturn(true, false);
+        Mockito.when(appListI.next()).thenReturn(baseObject);
+        Mockito.when(baseObject.getStringValue(Mockito.anyString())).thenReturn("");
+        Mockito.when(doc.newXObject(Mockito.any(EntityReference.class), Mockito.any(XWikiContext.class)))
+            .thenReturn(baseObject);
+        Mockito.doNothing().when(wiki).saveDocument(doc, context);
+
+
+        Assert.assertTrue(g.addMembershipApplicant(user, context) == 1);
     }
 }

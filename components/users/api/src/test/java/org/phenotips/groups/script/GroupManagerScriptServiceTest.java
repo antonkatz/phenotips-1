@@ -81,7 +81,22 @@ public class GroupManagerScriptServiceTest
         XWikiContext context = mock(XWikiContext.class);
         DocumentReference documentReference = mock(DocumentReference.class);
         GroupManager manager = this.mocker.getInstance(GroupManager.class);
-        when(manager.getGroup(groupName)).thenThrow(new NullPointerException());
+        when(manager.getGroup(groupName)).thenReturn(null);
+        Assert.assertTrue(this.mocker.getComponentUnderTest().addApplicant(user, documentReference, context) == 0);
+    }
+
+    @Test
+    public void addApplicantFailure() throws Exception
+    {
+        User user = mock(User.class);
+        DocumentReference groupName = mock(DocumentReference.class);
+        XWikiContext context = mock(XWikiContext.class);
+        DocumentReference documentReference = mock(DocumentReference.class);
+        Group group = mock(Group.class);
+        GroupManager manager = this.mocker.getInstance(GroupManager.class);
+        when(manager.getGroup(groupName)).thenReturn(group);
+        Mockito.when(group.addMembershipApplicant(user, context)).thenReturn(0);
+
         Assert.assertTrue(this.mocker.getComponentUnderTest().addApplicant(user, documentReference, context) == 0);
     }
 
@@ -94,8 +109,9 @@ public class GroupManagerScriptServiceTest
         Group group = mock(Group.class);
         GroupManager manager = this.mocker.getInstance(GroupManager.class);
         when(manager.getGroup(documentReference)).thenReturn(group);
-        Mockito.doNothing().when(group).addMembershipApplicant(user, context);
+        Mockito.when(group.addMembershipApplicant(user, context)).thenReturn(1);
 
         Assert.assertTrue(this.mocker.getComponentUnderTest().addApplicant(user, documentReference, context) == 1);
+        Mockito.verify(manager, Mockito.atLeastOnce()).getGroup(documentReference);
     }
 }
