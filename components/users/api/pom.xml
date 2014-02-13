@@ -128,7 +128,7 @@
             <rule>
               <limits>
                 <limit>
-                  <counter>INSTRUCTION</counter>
+                  <counter>BRANCH</counter>
                   <minimum>1.0</minimum>
                 </limit>
               </limits>
