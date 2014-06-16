@@ -29,7 +29,7 @@ import java.util.List;
  * @version $Id$
  * @since 1.0M10
  */
-public interface PatientData<T> extends List<T>
+public interface PatientData<T, DT> extends List<T>
 {
     /**
      * The name of this custom data.
@@ -37,4 +37,11 @@ public interface PatientData<T> extends List<T>
      * @return a short string
      */
     String getName();
+
+    /**
+     * Method for retrieving data without the need to manually iterate over the list.
+     *
+     * @return the piece of data that is attached to the lookup string
+     */
+    DT get(String name);
 }
