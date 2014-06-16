@@ -259,6 +259,11 @@
               <className>**/script/OtologyScriptService</className>
               <differenceType>8001</differenceType>
             </difference>
+            <difference>
+              <className>**/data/PatientData</className>
+              <method>java.lang.Object get(java.lang.String)</method>
+              <differenceType>7012</differenceType>
+            </difference>
           </ignored>
           <excludes>
             <exclude>**/internal/**</exclude>

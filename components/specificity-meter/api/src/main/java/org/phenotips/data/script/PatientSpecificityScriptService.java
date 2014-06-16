@@ -202,7 +202,7 @@ public class PatientSpecificityScriptService implements ScriptService
         }
 
         @Override
-        public <T> PatientData<T> getData(String name)
+        public <T, DT> PatientData<T, DT> getData(String name)
         {
             return null;
         }

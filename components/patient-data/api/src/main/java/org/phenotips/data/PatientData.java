@@ -25,6 +25,7 @@ import java.util.List;
  * Non-essential pieces of custom patient data that can be part of the patient record.
  *
  * @param <T> the type of data being represented; usually a key-value pair, where the {@code key} is a String (name)
+ * @param <DT> the type of data expected back when calling {@link #get(String)}
  * @see PatientDataController
  * @version $Id$
  * @since 1.0M10
@@ -41,6 +42,7 @@ public interface PatientData<T, DT> extends List<T>
     /**
      * Method for retrieving data without the need to manually iterate over the list.
      *
+     * @param name entry name to search for
      * @return the piece of data that is attached to the lookup string
      */
     DT get(String name);

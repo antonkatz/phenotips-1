@@ -55,7 +55,8 @@ import net.sf.json.JSONObject;
 @Component(roles = { PatientDataController.class })
 @Named("global-qualifiers")
 @Singleton
-public class GlobalQualifiersController implements PatientDataController<ImmutablePair<String, OntologyTerm>>
+public class GlobalQualifiersController
+    implements PatientDataController<ImmutablePair<String, OntologyTerm>, OntologyTerm>
 {
     private static final String DATA_NAME = "global-qualifiers";
 
@@ -71,7 +72,7 @@ public class GlobalQualifiersController implements PatientDataController<Immutab
     private OntologyManager ontologyManager;
 
     @Override
-    public PatientData<ImmutablePair<String, OntologyTerm>> load(Patient patient)
+    public PatientData<ImmutablePair<String, OntologyTerm>, OntologyTerm> load(Patient patient)
     {
         try {
             XWikiDocument doc = (XWikiDocument) this.documentAccessBridge.getDocument(patient.getDocument());
@@ -108,7 +109,7 @@ public class GlobalQualifiersController implements PatientDataController<Immutab
     @Override
     public void writeJSON(Patient patient, JSONObject json, Collection<String> selectedFieldNames)
     {
-        for (ImmutablePair<String, OntologyTerm> data : patient.<ImmutablePair<String, OntologyTerm>>getData(DATA_NAME))
+        for (ImmutablePair<String, OntologyTerm> data : patient.<ImmutablePair<String, OntologyTerm>, OntologyTerm>getData(DATA_NAME))
         {
             if (selectedFieldNames == null || selectedFieldNames.contains(data.getKey())) {
                 OntologyTerm term = data.getValue();
@@ -121,7 +122,7 @@ public class GlobalQualifiersController implements PatientDataController<Immutab
     }
 
     @Override
-    public PatientData<ImmutablePair<String, OntologyTerm>> readJSON(JSONObject json)
+    public PatientData<ImmutablePair<String, OntologyTerm>, OntologyTerm> readJSON(JSONObject json)
     {
         throw new UnsupportedOperationException();
     }

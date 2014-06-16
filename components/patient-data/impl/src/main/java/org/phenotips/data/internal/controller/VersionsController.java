@@ -59,7 +59,7 @@ import com.xpn.xwiki.objects.BaseObject;
 @Named("versions")
 @Singleton
 public class VersionsController extends AbstractSimpleController
-    implements PatientDataController<ImmutablePair<String, String>>
+    implements PatientDataController<ImmutablePair<String, String>, String>
 {
     /** The XClass used for storing version data of different ontologies. */
     private static final EntityReference ONTOLOGY_VERSION_CLASS_REFERENCE =
@@ -71,7 +71,7 @@ public class VersionsController extends AbstractSimpleController
     private Logger logger;
 
     @Override
-    public PatientData<ImmutablePair<String, String>> load(Patient patient)
+    public PatientData<ImmutablePair<String, String>, String> load(Patient patient)
     {
         List<ImmutablePair<String, String>> versions = new LinkedList<ImmutablePair<String, String>>();
 

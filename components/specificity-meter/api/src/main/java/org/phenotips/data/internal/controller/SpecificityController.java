@@ -58,7 +58,8 @@ import net.sf.json.processors.JsonValueProcessor;
 @Named("specificity")
 @Singleton
 @Unstable
-public class SpecificityController implements PatientDataController<ImmutablePair<String, Object>>, Initializable
+public class SpecificityController
+    implements PatientDataController<ImmutablePair<String, Object>, Object>, Initializable
 {
     /** The name of the data module exposed by this class. */
     private static final String NAME = "specificity";
@@ -91,7 +92,7 @@ public class SpecificityController implements PatientDataController<ImmutablePai
     }
 
     @Override
-    public PatientData<ImmutablePair<String, Object>> load(Patient patient)
+    public PatientData<ImmutablePair<String, Object>, Object> load(Patient patient)
     {
         PatientSpecificity spec = this.service.getSpecificity(patient);
         if (spec != null) {
@@ -121,7 +122,7 @@ public class SpecificityController implements PatientDataController<ImmutablePai
     {
         if (selectedFieldNames == null || selectedFieldNames.contains(NAME)) {
             SimpleNamedData<Object> specificity =
-                (SimpleNamedData<Object>) patient.<ImmutablePair<String, Object>> getData(NAME);
+                (SimpleNamedData<Object>) patient.<ImmutablePair<String, Object>, Object> getData(NAME);
             if (specificity != null) {
                 JSONObject result = new JSONObject();
                 for (ImmutablePair<String, Object> entry : specificity) {
@@ -133,7 +134,7 @@ public class SpecificityController implements PatientDataController<ImmutablePai
     }
 
     @Override
-    public PatientData<ImmutablePair<String, Object>> readJSON(JSONObject json)
+    public PatientData<ImmutablePair<String, Object>, Object> readJSON(JSONObject json)
     {
         // No need to read this, the score is not persisted
         return null;

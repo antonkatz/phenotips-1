@@ -60,7 +60,7 @@ import net.sf.json.JSONObject;
 @Component(roles = { PatientDataController.class })
 @Named("owner-contact")
 @Singleton
-public class ContactInformationController implements PatientDataController<ImmutablePair<String, String>>
+public class ContactInformationController implements PatientDataController<ImmutablePair<String, String>, String>
 {
     private static final String DATA_CONTACT = "contact";
 
@@ -94,7 +94,7 @@ public class ContactInformationController implements PatientDataController<Immut
     private PermissionsManager permissions;
 
     @Override
-    public PatientData<ImmutablePair<String, String>> load(Patient patient)
+    public PatientData<ImmutablePair<String, String>, String> load(Patient patient)
     {
         Owner owner = this.permissions.getPatientAccess(patient).getOwner();
         List<ImmutablePair<String, String>> contactInfo = getContactInfo(owner);
@@ -122,7 +122,7 @@ public class ContactInformationController implements PatientDataController<Immut
         if (selectedFieldNames != null && !selectedFieldNames.contains(getEnablingFieldName())) {
             return;
         }
-        PatientData<ImmutablePair<String, String>> data = patient.getData(DATA_CONTACT);
+        PatientData<ImmutablePair<String, String>, String> data = patient.getData(DATA_CONTACT);
         if (data == null || data.isEmpty()) {
             return;
         }
@@ -137,7 +137,7 @@ public class ContactInformationController implements PatientDataController<Immut
     }
 
     @Override
-    public PatientData<ImmutablePair<String, String>> readJSON(JSONObject json)
+    public PatientData<ImmutablePair<String, String>, String> readJSON(JSONObject json)
     {
         throw new UnsupportedOperationException();
     }
