@@ -39,7 +39,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * @since 1.0M10
  */
 public class SimpleNamedData<T> extends LinkedList<ImmutablePair<String, T>>
-    implements PatientData<ImmutablePair<String, T>>
+    implements PatientData<ImmutablePair<String, T>, T>
 {
     private static final long serialVersionUID = 1L;
 
