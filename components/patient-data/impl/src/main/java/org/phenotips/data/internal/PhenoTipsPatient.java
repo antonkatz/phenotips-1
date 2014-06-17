@@ -111,10 +111,10 @@ public class PhenoTipsPatient implements Patient
     private Set<Disorder> disorders = new TreeSet<Disorder>();
 
     /** The list of all the initialized data holders (PatientDataSerializer). */
-    private List<PatientDataController<?>> serializers;
+    private List<PatientDataController<?, ?>> serializers;
 
     /** Extra data that can be plugged into the patient record. */
-    private Map<String, PatientData<?>> extraData = new HashMap<String, PatientData<?>>();
+    private Map<String, PatientData<?, ?>> extraData = new HashMap<String, PatientData<?, ?>>();
 
     /**
      * Constructor that copies the data from an XDocument.
@@ -183,8 +183,8 @@ public class PhenoTipsPatient implements Patient
      */
     private void readPatientData()
     {
-        for (PatientDataController<?> serializer : this.serializers) {
-            PatientData<?> data = serializer.load(this);
+        for (PatientDataController<?, ?> serializer : this.serializers) {
+            PatientData<?, ?> data = serializer.load(this);
             if (data != null) {
                 this.extraData.put(data.getName(), data);
             }
@@ -211,7 +211,7 @@ public class PhenoTipsPatient implements Patient
     public String getExternalId()
     {
         try {
-            for (ImmutablePair<String, String> identifier : this.<ImmutablePair<String, String>> getData("identifiers")) {
+            for (ImmutablePair<String, String> identifier : this.<ImmutablePair<String, String>, String> getData("identifiers")) {
                 if (identifier.getKey().equalsIgnoreCase("external_id")) {
                     return identifier.getValue();
                 }
@@ -248,9 +248,9 @@ public class PhenoTipsPatient implements Patient
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> PatientData<T> getData(String name)
+    public <T, DT> PatientData<T, DT> getData(String name)
     {
-        return (PatientData<T>) this.extraData.get(name);
+        return (PatientData<T, DT>) this.extraData.get(name);
     }
 
     @Override
@@ -318,7 +318,7 @@ public class PhenoTipsPatient implements Patient
             result.element(JSON_KEY_DISORDERS, diseasesToJSON());
         }
 
-        for (PatientDataController<?> serializer : this.serializers) {
+        for (PatientDataController<?, ?> serializer : this.serializers) {
             serializer.writeJSON(this, result, onlyFieldNames);
         }
 
@@ -424,9 +424,9 @@ public class PhenoTipsPatient implements Patient
 
             updateDisordersFromJSON(doc, data, context, json);
 
-            for (PatientDataController<?> serializer : this.serializers) {
+            for (PatientDataController<?, ?> serializer : this.serializers) {
                 try {
-                    PatientData<?> patientData = serializer.readJSON(json);
+                    PatientData<?, ?> patientData = serializer.readJSON(json);
                     if (patientData != null) {
                         this.extraData.put(patientData.getName(), patientData);
                         serializer.save(this);

@@ -72,8 +72,8 @@ public class ContactInformationControllerTest
     private static final String GROUP_EMAIL = "contact@hospital.org";
 
     @Rule
-    public final MockitoComponentMockingRule<PatientDataController<ImmutablePair<String, String>>> mocker =
-        new MockitoComponentMockingRule<PatientDataController<ImmutablePair<String, String>>>(
+    public final MockitoComponentMockingRule<PatientDataController<ImmutablePair<String, String>, String>> mocker =
+        new MockitoComponentMockingRule<PatientDataController<ImmutablePair<String, String>, String>>(
             ContactInformationController.class);
 
     /** {@link ContactInformationController#load(Patient)} returns the user information when the owner is a user. */

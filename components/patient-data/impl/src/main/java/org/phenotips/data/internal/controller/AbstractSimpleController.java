@@ -47,7 +47,7 @@ import net.sf.json.JSONObject;
  * @version $Id$
  * @since 1.0M10
  */
-public abstract class AbstractSimpleController implements PatientDataController<ImmutablePair<String, String>>
+public abstract class AbstractSimpleController implements PatientDataController<ImmutablePair<String, String>, String>
 {
     /** Provides access to the underlying data storage. */
     @Inject
@@ -58,7 +58,7 @@ public abstract class AbstractSimpleController implements PatientDataController<
     private Logger logger;
 
     @Override
-    public PatientData<ImmutablePair<String, String>> load(Patient patient)
+    public PatientData<ImmutablePair<String, String>, String> load(Patient patient)
     {
         try {
             XWikiDocument doc = (XWikiDocument) this.documentAccessBridge.getDocument(patient.getDocument());
@@ -95,7 +95,7 @@ public abstract class AbstractSimpleController implements PatientDataController<
     @Override
     public void writeJSON(Patient patient, JSONObject json, Collection<String> selectedFieldNames)
     {
-        PatientData<ImmutablePair<String, String>> data = patient.getData(getName());
+        PatientData<ImmutablePair<String, String>, String> data = patient.getData(getName());
         if (data == null || data.isEmpty()) {
             return;
         }
@@ -114,7 +114,7 @@ public abstract class AbstractSimpleController implements PatientDataController<
     }
 
     @Override
-    public PatientData<ImmutablePair<String, String>> readJSON(JSONObject json)
+    public PatientData<ImmutablePair<String, String>, String> readJSON(JSONObject json)
     {
         throw new UnsupportedOperationException();
     }

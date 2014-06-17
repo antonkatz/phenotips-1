@@ -142,7 +142,7 @@ public class JsonMedSavantServer implements MedSavantServer, Initializable
     {
         PostMethod method = null;
         try {
-            PatientData<ImmutablePair<String, String>> identifiers = patient.getData("identifiers");
+            PatientData<ImmutablePair<String, String>, String> identifiers = patient.getData("identifiers");
             String eid = identifiers.get(0).getValue();
             String url = getMethodURL(VARIANT_MANAGER, "getVariantCountForDNAIDs");
             method = new PostMethod(url);
@@ -181,7 +181,7 @@ public class JsonMedSavantServer implements MedSavantServer, Initializable
     {
         PostMethod method = null;
         try {
-            PatientData<ImmutablePair<String, String>> identifiers = patient.getData("identifiers");
+            PatientData<ImmutablePair<String, String>, String> identifiers = patient.getData("identifiers");
             String url = getMethodURL("UploadManager", "upload");
             String eid = identifiers.get(0).getValue();
             XWikiContext context = Utils.getContext();
@@ -215,7 +215,7 @@ public class JsonMedSavantServer implements MedSavantServer, Initializable
         PostMethod method = null;
         List<JSONArray> result = new LinkedList<JSONArray>();
         try {
-            PatientData<ImmutablePair<String, String>> identifiers = patient.getData("identifiers");
+            PatientData<ImmutablePair<String, String>, String> identifiers = patient.getData("identifiers");
             String eid = identifiers.get(0).getValue();
             String url = getMethodURL(VARIANT_MANAGER, "getVariants");
             method = new PostMethod(url);
@@ -264,7 +264,7 @@ public class JsonMedSavantServer implements MedSavantServer, Initializable
         List<JSONArray> result = new LinkedList<JSONArray>();
         try {
             for (Integer refID : this.referenceIDs) {
-                PatientData<ImmutablePair<String, String>> identifiers = patient.getData("identifiers");
+                PatientData<ImmutablePair<String, String>, String> identifiers = patient.getData("identifiers");
                 String eid = identifiers.get(0).getValue();
                 String url = getMethodURL(VARIANT_MANAGER, "getVariants");
                 method = new PostMethod(url);

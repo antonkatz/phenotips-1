@@ -55,7 +55,7 @@ import net.sf.json.JSONObject;
 @Component(roles = { PatientDataController.class })
 @Named("sex")
 @Singleton
-public class SexController implements PatientDataController<ImmutablePair<String, String>>
+public class SexController implements PatientDataController<ImmutablePair<String, String>, String>
 {
     private static final String DATA_NAME = "sex";
 
@@ -87,7 +87,7 @@ public class SexController implements PatientDataController<ImmutablePair<String
     }
 
     @Override
-    public PatientData<ImmutablePair<String, String>> load(Patient patient)
+    public PatientData<ImmutablePair<String, String>, String> load(Patient patient)
     {
         try {
             XWikiDocument doc = (XWikiDocument) this.documentAccessBridge.getDocument(patient.getDocument());
@@ -115,7 +115,7 @@ public class SexController implements PatientDataController<ImmutablePair<String
                 throw new NullPointerException(ERROR_MESSAGE_NO_PATIENT_CLASS);
             }
 
-            String gender = patient.<ImmutablePair<String, String>>getData(DATA_NAME).get(0).getValue();
+            String gender = patient.<ImmutablePair<String, String>, String>getData(DATA_NAME).get(0).getValue();
 
             this.logger.warn("Saving gender value: [{}]", gender);
 
@@ -141,13 +141,13 @@ public class SexController implements PatientDataController<ImmutablePair<String
             return;
         }
 
-        for (ImmutablePair<String, String> data : patient.<ImmutablePair<String, String>>getData(DATA_NAME)) {
+        for (ImmutablePair<String, String> data : patient.<ImmutablePair<String, String>, String>getData(DATA_NAME)) {
             json.put(data.getKey(), data.getRight());
         }
     }
 
     @Override
-    public PatientData<ImmutablePair<String, String>> readJSON(JSONObject json)
+    public PatientData<ImmutablePair<String, String>, String> readJSON(JSONObject json)
     {
         if (!json.containsKey(DATA_NAME)) {
             // no supported data in provided JSON

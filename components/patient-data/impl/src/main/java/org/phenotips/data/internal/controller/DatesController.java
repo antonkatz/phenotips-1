@@ -57,7 +57,7 @@ import net.sf.json.JSONObject;
 @Component(roles = { PatientDataController.class })
 @Named("dates")
 @Singleton
-public class DatesController implements PatientDataController<ImmutablePair<String, Date>>
+public class DatesController implements PatientDataController<ImmutablePair<String, Date>, Date>
 {
     private static final String DATA_NAME = "dates";
 
@@ -73,7 +73,7 @@ public class DatesController implements PatientDataController<ImmutablePair<Stri
     private RecordConfigurationManager configurationManager;
 
     @Override
-    public PatientData<ImmutablePair<String, Date>> load(Patient patient)
+    public PatientData<ImmutablePair<String, Date>, Date> load(Patient patient)
     {
         try {
             XWikiDocument doc = (XWikiDocument) this.documentAccessBridge.getDocument(patient.getDocument());
@@ -112,7 +112,7 @@ public class DatesController implements PatientDataController<ImmutablePair<Stri
     {
         DateFormat dateFormat =
             new SimpleDateFormat(this.configurationManager.getActiveConfiguration().getISODateFormat());
-        for (ImmutablePair<String, Date> data : patient.<ImmutablePair<String, Date>>getData(DATA_NAME)) {
+        for (ImmutablePair<String, Date> data : patient.<ImmutablePair<String, Date>, Date>getData(DATA_NAME)) {
             if (selectedFieldNames == null || selectedFieldNames.contains(data.getKey())) {
                 json.put(data.getKey(), dateFormat.format(data.getRight()));
             }
@@ -120,7 +120,7 @@ public class DatesController implements PatientDataController<ImmutablePair<Stri
     }
 
     @Override
-    public PatientData<ImmutablePair<String, Date>> readJSON(JSONObject json)
+    public PatientData<ImmutablePair<String, Date>, Date> readJSON(JSONObject json)
     {
         throw new UnsupportedOperationException();
     }
