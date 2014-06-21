@@ -97,11 +97,10 @@ public interface Patient
      *
      * @param name the name of the custom data to access; this is a label for a category
      * @param <T> the type of data expected
-     * @param <DT> the type of data the values of the internal list of the returned result are expected to be
      * @return the requested data, may be {@code null}
      * @since 1.0M10
      */
-    <T, DT> PatientData<T, DT> getData(String name);
+    <T> PatientData<T> getData(String name);
 
     /**
      * Retrieve all the patient data in a JSON format. For example:

@@ -48,13 +48,12 @@ import net.sf.json.JSONObject;
  *
  * @param <T> the type of data being managed by this component; usually a key-value pair, where the {@code key} is a
  *            String (name)
- * @param <DT> the type of data expected back when looking up {@link org.phenotips.data.PatientData} object internally
  * @version $Id$
  * @since 1.0M10
  */
 @Unstable
 @Role
-public interface PatientDataController<T, DT>
+public interface PatientDataController<T>
 {
     /**
      * Plays the role of initialization function. Given a patient, extracts data from the underlying document and
@@ -63,7 +62,7 @@ public interface PatientDataController<T, DT>
      * @param patient the patient being loaded
      * @return the loaded data, if any, or {@code null}
      */
-    PatientData<T, DT> load(Patient patient);
+    PatientData<T> load(Patient patient);
 
     /**
      * Plays the role of a serialization function. Given a patient, saves the data that it {@link #load(Patient) loaded}
@@ -99,7 +98,7 @@ public interface PatientDataController<T, DT>
      * @param json the JSON that is to be imported
      * @return the loaded data, if any, or {@code null}
      */
-    PatientData<T, DT> readJSON(JSONObject json);
+    PatientData<T> readJSON(JSONObject json);
 
     /**
      * @return the name of the serializer

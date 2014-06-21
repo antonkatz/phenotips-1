@@ -133,7 +133,7 @@ public class PatientEventListener implements EventListener
         }
 
         @Override
-        public <T, DT> PatientData<T, DT> getData(String name)
+        public <T> PatientData<T> getData(String name)
         {
             return null;
         }
