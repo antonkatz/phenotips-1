@@ -56,6 +56,8 @@ public class PropertyDisplayer
 
     private static final String ITEM_TYPE_SUBSECTION = "subsection";
 
+    private static final String ITEM_TYPE_CONDITIONAL_SUBSECTION = "conditionalSubsection";
+
     private static final String ITEM_TYPE_FIELD = "field";
 
     private static final String INDEXED_NAME_KEY = "name";
@@ -222,8 +224,18 @@ public class PropertyDisplayer
 
     private boolean isSubsection(Map<String, ?> item)
     {
-        return ITEM_TYPE_SUBSECTION.equals(item.get(TYPE_KEY)) && String.class.isInstance(item.get(TITLE_KEY))
-            && Collection.class.isInstance(item.get(DATA_KEY));
+        return (ITEM_TYPE_SUBSECTION.equals(item.get(TYPE_KEY)) || ITEM_TYPE_CONDITIONAL_SUBSECTION.equals(item.get(TYPE_KEY)))
+            && String.class.isInstance(item.get(TITLE_KEY)) && Collection.class.isInstance(item.get(DATA_KEY));
+    }
+
+    /**
+     * This function is meant to be used on sections that are already know to be subsections.
+     * @param item the configuration object of the subsection
+     * @return true if the subsection is conditional, false otherwise
+     */
+    private boolean isConditionalSubsection(Map<String, ?> item)
+    {
+        return ITEM_TYPE_CONDITIONAL_SUBSECTION.equals(item.get(TYPE_KEY));
     }
 
     private boolean isField(Map<String, ?> item)
@@ -251,7 +263,14 @@ public class PropertyDisplayer
         if (type == null) {
             type = "";
         }
-        FormGroup subsection = new FormSubsection(title, type);
+        FormElement titleYesNoPicker = null;
+        if (isConditionalSubsection(subsectionTemplate)) {
+            String id = (String) subsectionTemplate.get(ID_KEY);
+            boolean yesSelected = customYesSelected.remove(id);
+            boolean noSelected = customNoSelected.remove(id);
+            titleYesNoPicker = generateField(id, title, true, yesSelected, noSelected);
+        }
+        FormGroup subsection = new FormSubsection(title, type, titleYesNoPicker);
         generateData(subsection, subsectionTemplate, customYesSelected, customNoSelected);
         return subsection;
     }

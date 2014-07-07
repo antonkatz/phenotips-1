@@ -19,23 +19,24 @@
  */
 package org.phenotips.tools;
 
-import org.xwiki.xml.XMLUtils;
-
 import org.apache.commons.lang3.StringUtils;
 
 public class FormSubsection extends FormGroup
 {
     private final String type;
 
+    private FormElement titleYesNoPicker;
+
     FormSubsection(String title)
     {
-        this(title, "");
+        this(title, "", null);
     }
 
-    FormSubsection(String title, String type)
+    FormSubsection(String title, String type, FormElement titleYesNoPicker)
     {
         super(title);
         this.type = type;
+        this.titleYesNoPicker = titleYesNoPicker;
     }
 
     @Override
@@ -44,16 +45,30 @@ public class FormSubsection extends FormGroup
         return this.title;
     }
 
+    /** Extend and override instead of this function */
+    private String displayElements(DisplayMode mode, String[] fieldNames)
+    {
+        String displayedElements = super.display(mode, fieldNames);
+        if (titleYesNoPicker != null) {
+            return "<div class='dropdown invisible' data-bind='generated'>"
+                + displayedElements + "</div></label>";
+        } else {
+            return "</label><div class='subsection " + this.type + "'>"
+                + displayedElements + "</div>";
+        }
+    }
+
     @Override
     public String display(DisplayMode mode, String[] fieldNames)
     {
-        String displayedElements = super.display(mode, fieldNames);
+        String picker = titleYesNoPicker != null ? titleYesNoPicker.display(mode, fieldNames) : "";
+        String displayedElements = displayElements(mode, fieldNames);
         if (StringUtils.isBlank(displayedElements)) {
             return "";
         }
         return "<label class='section'>"
-            + XMLUtils.escapeElementContent(this.title)
-            + "</label><div class='subsection " + this.type + "'>"
-            + displayedElements + "</div>";
+            + picker
+//            + XMLUtils.escapeElementContent(this.title)
+            + displayedElements;
     }
 }
