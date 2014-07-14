@@ -63,7 +63,7 @@ else
   JETTY_STOPPORT=8079
 fi
 
-echo Starting Jetty on port $JETTY_PORT ...
+echo Starting Jetty on port ${JETTY_PORT}, please wait...
 
 # Location where XWiki stores generated data and where database files are.
 XWIKI_DATA_DIR=data
@@ -101,4 +101,7 @@ START_OPTS="$START_OPTS -Dfile.encoding=UTF8"
 # service attacks.
 START_OPTS="$START_OPTS -Dorg.eclipse.jetty.server.Request.maxFormContentSize=1000000"
 
-java $START_OPTS $3 $4 $5 $6 $7 $8 $9 -jar $JETTY_HOME/start.jar
+# If there are no optional configuration files, make bash ignore the last parameter instead of passing it verbatim
+shopt -s nullglob
+
+java $START_OPTS $3 $4 $5 $6 $7 $8 $9 -jar $JETTY_HOME/start.jar ${JETTY_HOME}/etc/jetty.xml ${JETTY_HOME}/etc/jetty-*.xml

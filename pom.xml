@@ -129,8 +129,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <xwiki.version>5.4.5</xwiki.version>
-    <slf4j.version>1.7.6</slf4j.version>
-    <solr.version>4.8.1</solr.version>
+    <slf4j.version>1.7.7</slf4j.version>
+    <solr.version>4.9.0</solr.version>
     <enforcer.skip>false</enforcer.skip>
     <checkstyle.skip>false</checkstyle.skip>
     <clirr.skip>false</clirr.skip>
@@ -143,7 +143,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.3.1</version>
+        <version>3.3.2</version>
       </dependency>
       <!-- Everybody logs -->
       <dependency>
@@ -193,7 +193,7 @@
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient</artifactId>
-        <version>4.3.3</version>
+        <version>4.3.4</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
@@ -272,12 +272,12 @@
             <difference>
               <differenceType>7012</differenceType>
               <className>**/data/PatientData</className>
-              <method>java.lang.Boolean isIndexed()</method>
+              <method>boolean isIndexed()</method>
             </difference>
             <difference>
               <differenceType>7012</differenceType>
               <className>**/data/PatientData</className>
-              <method>java.lang.Boolean isNamed()</method>
+              <method>boolean isNamed()</method>
             </difference>
             <difference>
               <differenceType>7012</differenceType>
@@ -300,54 +300,13 @@
               <method>java.util.Iterator keyIterator()</method>
             </difference>
             <difference>
-              <differenceType>4001</differenceType>
-              <className>**/data/SimpleNamedData</className>
-              <to>**/util/List</to>
+              <differenceType>7012</differenceType>
+              <className>**/data/PatientData</className>
+              <method>java.util.Iterator dictionaryIterator()</method>
             </difference>
             <difference>
-              <differenceType>4001</differenceType>
+              <differenceType>8001</differenceType>
               <className>**/data/SimpleNamedData</className>
-              <to>**/util/Deque</to>
-            </difference>
-            <difference>
-              <differenceType>4001</differenceType>
-              <className>**/data/SimpleNamedData</className>
-              <to>**/util/Collection</to>
-            </difference>
-            <difference>
-              <differenceType>4001</differenceType>
-              <className>**/data/SimpleNamedData</className>
-              <to>**/util/Queue</to>
-            </difference>
-            <difference>
-              <differenceType>4001</differenceType>
-              <className>**/data/SimpleNamedData</className>
-              <to>**/lang/Cloneable</to>
-            </difference>
-            <difference>
-              <differenceType>4001</differenceType>
-              <className>**/data/SimpleNamedData</className>
-              <to>**/io/Serializable</to>
-            </difference>
-            <difference>
-              <differenceType>5001</differenceType>
-              <className>**/data/SimpleNamedData</className>
-              <to>**/util/AbstractCollection</to>
-            </difference>
-            <difference>
-              <differenceType>5001</differenceType>
-              <className>**/data/SimpleNamedData</className>
-              <to>**/util/AbstractList</to>
-            </difference>
-            <difference>
-              <differenceType>5001</differenceType>
-              <className>**/data/SimpleNamedData</className>
-              <to>**/util/AbstractSequentialList</to>
-            </difference>
-            <difference>
-              <differenceType>5001</differenceType>
-              <className>**/data/SimpleNamedData</className>
-              <to>**/util/LinkedList</to>
             </difference>
           </ignored>
           <excludes>

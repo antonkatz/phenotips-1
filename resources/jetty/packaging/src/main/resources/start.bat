@@ -28,6 +28,8 @@ REM     e.g. to increase the memory allocated to the JVM to 1GB, use
 REM       set START_OPTS=-Xmx1024m
 REM -------------------------------------------------------------------------
 
+setlocal EnableDelayedExpansion
+
 set JETTY_HOME=jetty
 if not defined START_OPTS set START_OPTS=-Xmx512m -XX:MaxPermSize=192m
 
@@ -45,7 +47,7 @@ if not defined JETTY_STOP_PORT (
   )
 )
 
-echo Starting Jetty on port %JETTY_PORT% ...
+echo Starting Jetty on port %JETTY_PORT%, please wait...
 
 REM Location where XWiki stores generated data and where database files are.
 set XWIKI_DATA_DIR=data
@@ -83,4 +85,7 @@ REM Note that setting this value too high can leave your server vulnerable to de
 REM service attacks.
 set START_OPTS=%START_OPTS% -Dorg.eclipse.jetty.server.Request.maxFormContentSize=1000000
 
-java %START_OPTS% %3 %4 %5 %6 %7 %8 %9 -jar %JETTY_HOME%/start.jar
+set JETTY_CONFIGURATION_FILES=
+for /r %%i in (%JETTY_HOME%\etc\jetty-*.xml) do set JETTY_CONFIGURATION_FILES=!JETTY_CONFIGURATION_FILES! "%%i"
+
+java %START_OPTS% %3 %4 %5 %6 %7 %8 %9 -jar %JETTY_HOME%/start.jar %JETTY_HOME%/etc/jetty.xml %JETTY_CONFIGURATION_FILES%

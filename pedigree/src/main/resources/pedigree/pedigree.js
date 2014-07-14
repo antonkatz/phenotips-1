@@ -22,6 +22,7 @@ var PedigreeEditor = Class.create({
         this._partnershipMenu = this.generatePartnershipMenu();
         this._nodetypeSelectionBubble = new NodetypeSelectionBubble(false);
         this._siblingSelectionBubble  = new NodetypeSelectionBubble(true);
+        this._okCancelDialogue = new OkCancelDialogue();
         this._disorderLegend = new DisorgerLegend();
 
         this._view = new View();
@@ -29,6 +30,7 @@ var PedigreeEditor = Class.create({
         this._actionStack = new ActionStack();
         this._templateSelector = new TemplateSelector();
         this._importSelector = new ImportSelector();
+        this._exportSelector = new ExportSelector();
         this._saveLoadIndicator = new SaveLoadIndicator();
         this._versionUpdater = new VersionUpdater();
         this._saveLoadEngine = new SaveLoadEngine();
@@ -75,6 +77,10 @@ var PedigreeEditor = Class.create({
         importButton && importButton.on("click", function(event) {
             editor.getImportSelector().show();
         });
+        var exportButton = $('action-export');
+        exportButton && exportButton.on("click", function(event) {
+            editor.getExportSelector().show();
+        });
 
         var closeButton = $('action-close');
         closeButton && closeButton.on("click", function(event) {
@@ -105,16 +111,16 @@ var PedigreeEditor = Class.create({
 
     /**
      * @method getView
-     * @return {View} (responsible for managing graphical representations of nodes in the editor)
+     * @return {View} (responsible for managing graphical representations of nodes and interactive elements)
      */
     getView: function() {
         return this._view;
     },
-    
+
     /**
      * @method getVersionUpdater
      * @return {VersionUpdater}
-     */    
+     */
     getVersionUpdater: function() {
         return this._versionUpdater;
     },
@@ -129,7 +135,7 @@ var PedigreeEditor = Class.create({
 
     /**
      * @method getController
-     * @return {Controller} (responsible for managing data changes)
+     * @return {Controller} (responsible for managing user input and corresponding data changes)
      */
     getController: function() {
         return this._controller;
@@ -137,10 +143,18 @@ var PedigreeEditor = Class.create({
 
     /**
      * @method getActionStack
-     * @return {ActionStack} (responsible undoing and redoing actions)
+     * @return {ActionStack} (responsible for undoing and redoing actions)
      */
     getActionStack: function() {
         return this._actionStack;
+    },
+
+    /**
+     * @method getOkCancelDialogue
+     * @return {OkCancelDialogue} (responsible for displaying ok/cancel prompts)
+     */
+    getOkCancelDialogue: function() {
+        return this._okCancelDialogue;
     },
 
     /**
@@ -199,7 +213,7 @@ var PedigreeEditor = Class.create({
         if (!document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1")) {
             // implies unpredictable behavior when using handles & interactive elements,
             // and most likely extremely slow on any CPU
-            return true;            
+            return true;
         }
         // http://kangax.github.io/es5-compat-table/
         if (!window.JSON) {
@@ -245,14 +259,22 @@ var PedigreeEditor = Class.create({
     getTemplateSelector: function() {
         return this._templateSelector
     },
-    
+
     /**
      * @method getImportSelector
-     * @return {importSelector}
+     * @return {ImportSelector}
      */
     getImportSelector: function() {
         return this._importSelector
-    },    
+    },
+
+    /**
+     * @method getExportSelector
+     * @return {ExportSelector}
+     */
+    getExportSelector: function() {
+        return this._exportSelector
+    },
 
     /**
      * Returns true if any of the node menus are visible
@@ -317,7 +339,13 @@ var PedigreeEditor = Class.create({
                 'label': 'External ID',
                 'type' : 'text',
                 'function' : 'setExternalID'
-            },            
+            },
+            {
+                'name' : 'ethnicity',
+                'label' : 'Ethnicities',
+                'type' : 'ethnicity-picker',
+                'function' : 'setEthnicities'
+            },
             {
                 'name' : 'carrier',
                 'label' : 'Carrier status',
@@ -475,8 +503,14 @@ var PedigreeEditor = Class.create({
                 'function' : 'setExternalID'
             },
             {
+                'name' : 'ethnicity',
+                'label' : 'Ethnicities<br>(common to all individuals in the group)',
+                'type' : 'ethnicity-picker',
+                'function' : 'setEthnicities'
+            },
+            {
                 'name' : 'disorders',
-                'label' : 'Known disorders common to all individuals in the group',
+                'label' : 'Known disorders<br>(common to all individuals in the group)',
                 'type' : 'disease-picker',
                 'function' : 'setDisorders'
             },
@@ -504,7 +538,7 @@ var PedigreeEditor = Class.create({
                 'label' : 'Documented evaluation',
                 'type' : 'checkbox',
                 'function' : 'setEvaluated'
-            },            
+            },
             {
                 'name' : 'adopted',
                 'label' : 'Adopted in',

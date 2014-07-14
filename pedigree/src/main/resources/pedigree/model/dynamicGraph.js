@@ -391,7 +391,13 @@ DynamicPositionedGraph.prototype = {
             var allRels = this.DG.GG.getAllRelationships(v);
             for (var i = 0; i < allRels.length; i++) {
                 removedList[allRels[i]] = true;
-                var chhubId = this.DG.GG.getOutEdges(allRels[i])[0];
+            }
+        }
+
+        // remove all childhubs of all relationships that need to be removed
+        for (var node in removedList) {
+            if (removedList.hasOwnProperty(node) && this.isRelationship(node)) {
+                var chhubId = this.DG.GG.getOutEdges(node)[0];
                 removedList[chhubId] = true;
             }
         }
@@ -898,9 +904,6 @@ DynamicPositionedGraph.prototype = {
         // fix common layout mistakes (e.g. relationship not right above the only child)
         this._heuristics.improvePositioning(ranksBefore, rankYBefore);
 
-        // update vertical separation for all nodes & compute ancestors
-        this._updateauxiliaryStructures(ranksBefore, rankYBefore);
-
         var movedNodes = this._findMovedNodes( numNodesBefore, positionsBefore, ranksBefore, vertLevelsBefore, rankYBefore );
         if (!arrayContains(movedNodes, parentRel))
             movedNodes.push(parentRel);
@@ -1157,10 +1160,10 @@ DynamicPositionedGraph.prototype = {
         //this._debugPrintAll("before");
 
         if (importType == "ped") {
-            var baseGraph = PedigreeImport.initFromPED(importString, importOptions.acceptUnknownPhenotypes, importOptions.markEvaluated);
+            var baseGraph = PedigreeImport.initFromPED(importString, importOptions.acceptUnknownPhenotypes, importOptions.markEvaluated, importOptions.externalIdMark);
             if (!this._recreateUsingBaseGraph(baseGraph)) return null;  // no changes
         } else if (importType == "gedcom") {
-            var baseGraph = PedigreeImport.initFromGEDCOM(importString, importOptions.markEvaluated);
+            var baseGraph = PedigreeImport.initFromGEDCOM(importString, importOptions.markEvaluated, importOptions.externalIdMark);
             if (!this._recreateUsingBaseGraph(baseGraph)) return null;  // no changes
         } else if (importType == "simpleJSON") {
             var baseGraph = PedigreeImport.initFromSimpleJSON(importString);
@@ -1254,12 +1257,16 @@ DynamicPositionedGraph.prototype = {
 
     _updateauxiliaryStructures: function(ranksBefore, rankYBefore)
     {
+        var timer = new Timer();
+
         // update vertical levels
         this.DG.vertLevel = this.DG.positionVertically();
         this.DG.rankY     = this.DG.computeRankY(ranksBefore, rankYBefore);
 
         // update ancestors
         this.updateAncestors();
+
+        timer.printSinceLast("=== Vertical spacing + ancestors runtime: ");
     },
 
     _getAllNodes: function (minID, maxID)
@@ -2603,68 +2610,59 @@ Heuristics.prototype = {
                     if (this.DG.GG.isChildhub(v)) break; // skip childhub level entirely
 
                     var slack = xcoord.getSlackOnTheRight(v);
+                    //console.log("V = " + v + ", slack: " + slack);
                     if (slack == 0) continue;
 
-                    // looking for an edge going between v and a vertex on the same rank and to the right of v
-                    var allEdges = this.DG.GG.getAllEdges(v);
-                    for (var i = 0; i < allEdges.length; i++) {
-                        var u = allEdges[i];
-                        if (this.DG.ranks[u] == rank && this.DG.order.vOrder[u] > order) {
+                    // so, v has some slack on the right and has at least one edge going right on the same rank.
+                    // let see if we can shorten the distance between v and its right neighbour (by shortening
+                    // all edges spanning the gap between v and its right neighbour - without bumping any nodes
+                    // connected by all other edges into each other)
 
-                            // so, v has some slack on the right and has at least one edge going right on the same rank.
-                            // let see if we can shorten the distance between v and its rigthneighbour (by shortening
-                            // all edges between v and vertiuces to the right of v - without bumping any nodes connected
-                            // by all other edges into each other)
-
-                            //console.log("V = " + v);
-
-                            var DG = this.DG;
-                            var excludeEdgesSpanningOrder = function(from, to) {
-                                // filter to exclude all edges spanning the gap between v and its right neighbour
-                                if (DG.ranks[from] == rank && DG.ranks[to] == rank) {
-                                    var orderFrom = DG.order.vOrder[from];
-                                    var orderTo   = DG.order.vOrder[to];
-                                    if ((orderFrom <= order && orderTo   > order) ||
-                                        (orderTo   <= order && orderFrom > order) ) {
-                                        return false;
-                                    }
-                                }
-                                return true;
-                            };
-
-                            var rightNeighbour = this.DG.order.order[rank][order+1];
-
-                            // either move V and nodes connected to V left, or rightNeighbour and nodes connected to it right
-                            // (in both cases "connected" means "connected not using edges spanning V-rightNeighbour gap")
-                            // If maxComponentSize is not limited, then no point to analize other component, since
-                            var stopSet = {};
-                            stopSet[rightNeighbour] = true;
-                            var component = this.DG.findConnectedComponent(v, excludeEdgesSpanningOrder, stopSet, maxComponentSize );
-                            var leftSide  = true;
-
-                            if (component.stopSetReached) break; // can't shorten here: nodes are firmly connected via other edges
-
-                            if (component.size > maxComponentSize) {
-                                // can't move component on the left - it is too big. Check the right side
-                                component = this.DG.findConnectedComponent(rightNeighbour, excludeEdgesSpanningOrder, {}, maxComponentSize );
-                                if (component.size > maxComponentSize) break;  // can't move component on the right - too big as well
-                                leftSide  = false;
+                    var DG = this.DG;
+                    var excludeEdgesSpanningOrder = function(from, to) {
+                        // filter to exclude all edges spanning the gap between v and its right neighbour
+                        if (DG.ranks[from] == rank && DG.ranks[to] == rank) {
+                            var orderFrom = DG.order.vOrder[from];
+                            var orderTo   = DG.order.vOrder[to];
+                            if ((orderFrom <= order && orderTo   > order) ||
+                                (orderTo   <= order && orderFrom > order) ) {
+                                return false;
                             }
+                        }
+                        return true;
+                    };
 
-                            slack = leftSide ? xcoord.findVertexSetSlacks(component.component).rightSlack // slack on the right side of left component
-                                             : -xcoord.findVertexSetSlacks(component.component).leftSlack;
+                    var rightNeighbour = this.DG.order.order[rank][order+1];
 
-                            if (slack == 0) break;
+                    // either move V and nodes connected to V left, or rightNeighbour and nodes connected to it right
+                    // (in both cases "connected" means "connected not using edges spanning V-rightNeighbour gap")
+                    // If maxComponentSize is not limited, then no point to analize other component, since
+                    var stopSet = {};
+                    stopSet[rightNeighbour] = true;
+                    var component = this.DG.findConnectedComponent(v, excludeEdgesSpanningOrder, stopSet, maxComponentSize );
+                    var leftSide  = true;
 
-                            console.log("Moving: " + stringifyObject(component.component) + " by " + slack);
+                    if (component.stopSetReached) continue; // can't shorten here: nodes are firmly connected via other edges
 
-                            for (node in component.component) {
-                                if (component.component.hasOwnProperty(node)) {
-                                    xcoord.xcoord[node] += slack;
-                                }
-                            }
+                    if (component.size > maxComponentSize) {
+                        // can't move component on the left - it is too big. Check the right side
+                        component = this.DG.findConnectedComponent(rightNeighbour, excludeEdgesSpanningOrder, {}, maxComponentSize );
+                        if (component.size > maxComponentSize) continue;  // can't move component on the right - too big as well
+                        leftSide  = false;
+                    }
 
-                            break;
+                    slack = leftSide ? xcoord.findVertexSetSlacks(component.component).rightSlack // slack on the right side of left component
+                                     : -xcoord.findVertexSetSlacks(component.component).leftSlack;
+
+                    if (slack == 0) continue;
+
+                    console.log("Moving: " + stringifyObject(component.component) + " by " + slack);
+
+                    improved = true;
+
+                    for (var node in component.component) {
+                        if (component.component.hasOwnProperty(node)) {
+                            xcoord.xcoord[node] += slack;
                         }
                     }
                 }
@@ -2965,7 +2963,7 @@ Heuristics.prototype = {
         for (var e = 0; e < longEdges.length; e++) {
             var chain = longEdges[e];
             //this.DG.displayGraph(xcoord.xcoord, "pre-straighten-"+stringifyObject(chain));
-            console.log("trying to force-straighten edge " + stringifyObject(chain));
+            //console.log("trying to force-straighten edge " + stringifyObject(chain));
 
             //var person = this.DG.GG.getInEdges(chain[0])[0];
             do {
