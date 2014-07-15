@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<!--
+/*
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
  *
@@ -18,26 +16,44 @@
  * License along with this software; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
--->
+ */
+package org.phenotips.data.internal.controller;
 
-<xwikidoc version="1.1">
-  <web>XWiki</web>
-  <name>XWikiLogin</name>
-  <language/>
-  <defaultLanguage/>
-  <translation>0</translation>
-  <creator>xwiki:XWiki.Admin</creator>
-  <creationDate>1401822158000</creationDate>
-  <parent>XWiki.WebHome</parent>
-  <author>xwiki:XWiki.Admin</author>
-  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <date>1401822158000</date>
-  <contentUpdateDate>1401822158000</contentUpdateDate>
-  <version>1.1</version>
-  <title>Login</title>
-  <comment/>
-  <minorEdit>false</minorEdit>
-  <syntaxId>xwiki/2.0</syntaxId>
-  <hidden>true</hidden>
-  <content/>
-</xwikidoc>
+import org.phenotips.data.PatientDataController;
+
+import org.xwiki.component.annotation.Component;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.inject.Named;
+import javax.inject.Singleton;
+
+/**
+ * Handles the APGAR scores in the patient record.
+ */
+@Component(roles = { PatientDataController.class })
+@Named("apgar")
+@Singleton
+public class APGARController extends AbstractSimpleController
+{
+    @Override
+    public String getName()
+    {
+        return "apgar";
+    }
+
+    @Override
+    protected String getJsonPropertyName()
+    {
+        return "apgar";
+    }
+
+    @Override protected List<String> getProperties()
+    {
+        List<String> list = new LinkedList<String>();
+        list.add("apgar1");
+        list.add("apgar5");
+        return list;
+    }
+}
