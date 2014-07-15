@@ -169,4 +169,26 @@ public class ConversionHelpers
     {
         return sectionFeatureTree;
     }
+
+    public static String wrapString(String string, Integer charactersPerLine)
+    {
+        StringBuilder returnString = new StringBuilder(string);
+        Integer counter = charactersPerLine;
+        Character nextChar = null;
+        while(counter < string.length()) {
+            Boolean found = false;
+            /* TODO. See if this breaks in Unicode */
+            while (nextChar == null || nextChar.compareTo(' ') != 0) {
+                nextChar = string.charAt(counter);
+                counter++;
+                found = true;
+            }
+            if (found) {
+                returnString.insert(counter, "\n");
+            }
+
+            counter += charactersPerLine;
+        }
+        return returnString.toString();
+    }
 }

@@ -302,14 +302,14 @@ public class DataToCellConverter
             x++;
         }
         if (headerIds.remove("gender")) {
-            String sex = patient.<String>getData("sex").get("sex");
+            String sex = patient.<String>getData("sex").getValue();
             DataCell cell = new DataCell(sex, x, 0);
             bodySection.addCell(cell);
             x++;
         }
         if (headerIds.remove("indication_for_referral")) {
             String indicationForReferral = patient.<String>getData("notes").get("indication_for_referral");
-            indicationForReferral = wrapString(indicationForReferral, this.charactersPerLine);
+            indicationForReferral = ConversionHelpers.wrapString(indicationForReferral, charactersPerLine);
             DataCell cell = new DataCell(indicationForReferral, x, 0);
             bodySection.addCell(cell);
             x++;
@@ -318,25 +318,5 @@ public class DataToCellConverter
         return bodySection;
     }
 
-    public static String wrapString(String string, Integer charactersPerLine)
-    {
-        StringBuilder returnString = new StringBuilder(string);
-        Integer counter = charactersPerLine;
-        Character nextChar = null;
-        while(counter < string.length()) {
-            Boolean found = false;
-            /* TODO. See if this breaks in Unicode */
-            while (nextChar == null || nextChar.compareTo(' ') != 0) {
-                nextChar = string.charAt(counter);
-                counter++;
-                found = true;
-            }
-            if (found) {
-                returnString.insert(counter, "\n");
-            }
-
-            counter += charactersPerLine;
-        }
-        return returnString.toString();
-    }
+    //patient.getData("global-qualifiers").get("global_mode_of_inheritance")
 }
