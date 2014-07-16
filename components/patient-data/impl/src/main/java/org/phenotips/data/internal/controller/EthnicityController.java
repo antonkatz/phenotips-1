@@ -24,7 +24,7 @@ import org.phenotips.data.PatientDataController;
 import org.xwiki.component.annotation.Component;
 
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Named;
@@ -34,43 +34,38 @@ import javax.inject.Singleton;
  * Handles the information found in the family history section of the patient record.
  */
 @Component(roles = {PatientDataController.class})
-@Named("prenatalPhenotype")
+@Named("ethnicity")
 @Singleton
-public class PrenatalPhenotypeController extends AbstractComplexController<List<String>>
+public class EthnicityController extends AbstractComplexController<List<String>>
 {
-    final static String PRENATAL_PHENOTYPE = "prenatal_phenotype";
-
-    final static String NEGATIVE_PRENATAL_PHENOTYPE = "negative_prenatal_phenotype";
-
-    private List<String> hpoCodes = Arrays.asList(PRENATAL_PHENOTYPE, NEGATIVE_PRENATAL_PHENOTYPE);
 
     @Override
     public String getName()
     {
-        return "prenatalPerinatalPhenotype";
+        return "ethnicity";
     }
 
     @Override
     protected String getJsonPropertyName()
     {
-        return "prenatal_perinatal_history";
+        return "ethnicity";
     }
 
     @Override
     protected List<String> getProperties()
     {
-        return Arrays.asList(PRENATAL_PHENOTYPE, NEGATIVE_PRENATAL_PHENOTYPE);
+        return Arrays.asList("maternal_ethnicity", "paternal_ethnicity");
     }
 
     @Override
     protected List<String> getBooleanFields()
     {
-        return new LinkedList<String>();
+        return Collections.emptyList();
     }
 
     @Override
     protected List<String> getCodeFields()
     {
-        return hpoCodes;
+        return Collections.emptyList();
     }
 }

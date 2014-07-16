@@ -19,22 +19,23 @@
  */
 package org.phenotips.data.internal.controller;
 
+import org.phenotips.data.DictionaryPatientData;
 import org.phenotips.data.Patient;
 import org.phenotips.data.PatientData;
 import org.phenotips.data.PatientDataController;
-import org.phenotips.data.SimpleNamedData;
 import org.phenotips.data.internal.AbstractPhenoTipsOntologyProperty;
 
 import org.xwiki.bridge.DocumentAccessBridge;
 
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 
 import com.xpn.xwiki.doc.XWikiDocument;
@@ -51,7 +52,7 @@ import net.sf.json.JSONObject;
  * @version $Id$
  * @since 1.0M10
  */
-public abstract class AbstractComplexController<T> implements PatientDataController<ImmutablePair<String, T>>
+public abstract class AbstractComplexController<T> implements PatientDataController<T>
 {
     /** Provides access to the underlying data storage. */
     @Inject
@@ -62,7 +63,7 @@ public abstract class AbstractComplexController<T> implements PatientDataControl
     private Logger logger;
 
     @Override
-    public PatientData<ImmutablePair<String, T>> load(Patient patient)
+    public PatientData<T> load(Patient patient)
     {
         try {
             XWikiDocument doc = (XWikiDocument) this.documentAccessBridge.getDocument(patient.getDocument());
@@ -70,14 +71,14 @@ public abstract class AbstractComplexController<T> implements PatientDataControl
             if (data == null) {
                 throw new NullPointerException("The patient does not have a PatientClass");
             }
-            List<ImmutablePair<String, T>> result = new LinkedList<ImmutablePair<String, T>>();
+            Map<String, T> result = new HashMap<String, T>();
             for (String propertyName : getProperties()) {
                 BaseProperty field = (BaseProperty) data.getField(propertyName);
                 if (field != null) {
-                    result.add(ImmutablePair.of(propertyName, (T) field.getValue()));
+                    result.put(propertyName, (T) field.getValue());
                 }
             }
-            return new SimpleNamedData<T>(getName(), result);
+            return new DictionaryPatientData<T>(getName(), result);
         } catch (Exception e) {
             this.logger.error("Could not find requested document");
         }
@@ -87,13 +88,15 @@ public abstract class AbstractComplexController<T> implements PatientDataControl
     @Override
     public void writeJSON(Patient patient, JSONObject json, Collection<String> selectedFieldNames)
     {
-        PatientData<ImmutablePair<String, String>> data = patient.getData(getName());
-        if (data == null || data.isEmpty()) {
+        PatientData<T> data = patient.getData(getName());
+        Iterator<Map.Entry<String, T>> iterator = data.dictionaryIterator();
+        if (iterator == null || !iterator.hasNext()) {
             return;
         }
         JSONObject container = json.getJSONObject(getJsonPropertyName());
 
-        for (ImmutablePair<String, String> item : data) {
+        while (iterator.hasNext()) {
+            Map.Entry<String, T> item = iterator.next();
             if (selectedFieldNames == null || selectedFieldNames.contains(item.getKey())) {
                 if (container == null || container.isNullObject()) {
                     // put() is placed here because we want to create the property iff at least one field is set/enabled
@@ -120,9 +123,9 @@ public abstract class AbstractComplexController<T> implements PatientDataControl
     private Object format(String key, Object value)
     {
         if (getBooleanFields().contains(key)) {
-            return booleanConvert((String) value);
+            return booleanConvert(value.toString());
         } else if (getCodeFields().contains(key)) {
-            return codeToHumanReadable((List<String>) value);
+            return codeToHumanReadable((List<T>) value);
         } else {
             return value;
         }
@@ -139,11 +142,11 @@ public abstract class AbstractComplexController<T> implements PatientDataControl
         }
     }
 
-    private JSONArray codeToHumanReadable(List<String> codes)
+    private JSONArray codeToHumanReadable(List<T> codes)
     {
         JSONArray labeledList = new JSONArray();
-        for (String code : codes) {
-            OntologyProperty term = new OntologyProperty(code);
+        for (T code : codes) {
+            OntologyProperty term = new OntologyProperty(code.toString());
             labeledList.add(term.toJSON());
         }
         return labeledList;
@@ -162,7 +165,7 @@ public abstract class AbstractComplexController<T> implements PatientDataControl
     }
 
     @Override
-    public PatientData<ImmutablePair<String, T>> readJSON(JSONObject json)
+    public PatientData<T> readJSON(JSONObject json)
     {
         throw new UnsupportedOperationException();
     }
@@ -179,8 +182,7 @@ public abstract class AbstractComplexController<T> implements PatientDataControl
  * org.phenotips.data.internal.AbstractPhenoTipsOntologyProperty} in a separate file, or create such class here.
  * Given the fact the the {@link org.phenotips.data.internal.AbstractPhenoTipsOntologyProperty} is abstract only by
  * having a protected constructor, which fully satisfies the needed functionality, it makes the most sense to put
- * {@link
- * OntologyProperty} here.
+ * {@link OntologyProperty} here.
  */
 class OntologyProperty extends AbstractPhenoTipsOntologyProperty
 {
