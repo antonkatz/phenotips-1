@@ -198,6 +198,8 @@ public class ConversionHelpers
             return "No";
         } else if (StringUtils.equals("1", strInt)) {
             return "Yes";
+        } else if (StringUtils.equals("", strInt)) {
+            return "";
         } else {
             return "N/A";
         }
@@ -205,6 +207,9 @@ public class ConversionHelpers
 
     public static String integerToStrBool(Integer integer)
     {
+        if (integer == null) {
+            return "";
+        }
         if (integer == 0) {
             return "No";
         } else if (integer == 1) {

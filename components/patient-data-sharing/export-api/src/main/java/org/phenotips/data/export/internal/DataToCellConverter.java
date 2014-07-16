@@ -26,6 +26,7 @@ import org.phenotips.data.PatientData;
 import org.phenotips.ontology.internal.solr.SolrOntologyTerm;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -352,11 +353,11 @@ public class DataToCellConverter
             }
         }
         enabledHeaderIdsBySection.put(sectionName, present);
-
-        DataSection headerSection = new DataSection(sectionName);
         if (present.isEmpty()) {
             return null;
         }
+
+        DataSection headerSection = new DataSection(sectionName);
 
         int bottomY = 1;
         int ethnicityOffset = 0;
@@ -442,5 +443,105 @@ public class DataToCellConverter
         return bodySection;
     }
 
-    //patient.getData("global-qualifiers").get("global_mode_of_inheritance")
+    public DataSection prenatalPerinatalHistoryHeader(Set<String> enabledFields) throws Exception
+    {
+        String sectionName = "prenatalPerinatalHistory";
+        Map<String, String> fieldToHeaderMap = new LinkedHashMap<String, String>();
+        fieldToHeaderMap.put("assistedReproduction_fertilityMeds", "Fertility medication");
+        fieldToHeaderMap.put("ivf", "In vitro fertilization");
+        fieldToHeaderMap.put("assistedReproduction_surrogacy", "Surrogacy");
+        fieldToHeaderMap.put("apgar1", "1 min");
+        fieldToHeaderMap.put("apgar5", "5 min");
+
+        Set<String> present = new LinkedHashSet<String>();
+        for (String fieldId : fieldToHeaderMap.keySet()) {
+            if (enabledFields.remove(fieldId)) {
+                present.add(fieldId);
+            }
+        }
+        enabledHeaderIdsBySection.put(sectionName, present);
+        if (present.isEmpty()) {
+            return null;
+        }
+
+        DataSection headerSection = new DataSection(sectionName);
+
+        List<String> apgarFields = new LinkedList<String>(Arrays.asList("apgar1", "apgar2"));
+        List<String> assitedReproductionFields = new LinkedList<String>(
+            Arrays.asList("ivf", "assistedReproduction_surrogacy", "assistedReproduction_fertilityMeds"));
+        apgarFields.retainAll(present);
+        assitedReproductionFields.retainAll(present);
+        int apgarOffset = apgarFields.size();
+        int assistedReproductionOffset = apgarOffset + assitedReproductionFields.size() + 1;
+        int bottomY = (apgarOffset > 0 || assistedReproductionOffset > 0) ? 2 : 1;
+
+        int x = 0;
+        for (String fieldId : present) {
+            DataCell headerCell = new DataCell(fieldToHeaderMap.get(fieldId), x, bottomY, StyleOption.HEADER);
+            headerSection.addCell(headerCell);
+            x++;
+        }
+        if (apgarOffset > 0) {
+            DataCell headerCell = new DataCell("APGAR Score", x - apgarOffset, 1, StyleOption.HEADER);
+            headerSection.addCell(headerCell);
+            x++;
+        }
+        if (assistedReproductionOffset > 0) {
+            DataCell headerCell =
+                new DataCell("Assisted Reproduction", x - assistedReproductionOffset, 1, StyleOption.HEADER);
+            headerSection.addCell(headerCell);
+        }
+        DataCell headerCell = new DataCell("Prenatal and Perinatal History", 0, 0, StyleOption.LARGE_HEADER);
+        headerCell.addStyle(StyleOption.HEADER);
+        headerSection.addCell(headerCell);
+
+        return headerSection;
+    }
+
+    public DataSection prenatalPerinatalHistoryBody(Patient patient)
+    {
+        String sectionName = "prenatalPerinatalHistory";
+        Set<String> present = enabledHeaderIdsBySection.get(sectionName);
+        if (present == null || present.isEmpty()) {
+            return null;
+        }
+
+        DataSection bodySection = new DataSection(sectionName);
+        PatientData<Integer> history = patient.getData("prenatalPerinatalHistory");
+        PatientData<String> apgarScores = patient.getData("apgar");
+        Integer x = 0;
+        if (present.contains("assistedReproduction_fertilityMeds")) {
+            Integer assisted = history.get("assistedReproduction_fertilityMeds");
+            DataCell cell = new DataCell(ConversionHelpers.integerToStrBool(assisted), x, 0);
+            bodySection.addCell(cell);
+            x++;
+        }
+        if (present.contains("ivf")) {
+            Integer assisted = history.get("ivf");
+            DataCell cell = new DataCell(ConversionHelpers.integerToStrBool(assisted), x, 0);
+            bodySection.addCell(cell);
+            x++;
+        }
+        if (present.contains("assistedReproduction_surrogacy")) {
+            Integer assisted = history.get("assistedReproduction_surrogacy");
+            DataCell cell = new DataCell(ConversionHelpers.integerToStrBool(assisted), x, 0);
+            bodySection.addCell(cell);
+            x++;
+        }
+        if (present.contains("apgar1")) {
+            String apgar = apgarScores.get("apgar1");
+            DataCell cell = new DataCell(apgar, x, 0);
+            bodySection.addCell(cell);
+            x++;
+        }
+        if (present.contains("apgar5")) {
+            String apgar = apgarScores.get("apgar5");
+            DataCell cell = new DataCell(apgar, x, 0);
+            bodySection.addCell(cell);
+            x++;
+        }
+
+        return bodySection;
+    }
+
 }

@@ -90,6 +90,7 @@ public class SheetAssembler
             _patientSections.add(converter.featuresBody(patient));
             _patientSections.add(converter.patientInfoBody(patient));
             _patientSections.add(converter.familyHistoryBody(patient));
+            _patientSections.add(converter.prenatalPerinatalHistoryBody(patient));
 
             //This is needed for a null check
             for (DataSection section : _patientSections) {
@@ -110,6 +111,7 @@ public class SheetAssembler
         _headerSections.add(converter.featuresHeader());
         _headerSections.add(converter.patientInfoHeader(enabledFields));
         _headerSections.add(converter.familyHistoryHeader(enabledFields));
+        _headerSections.add(converter.prenatalPerinatalHistoryHeader(enabledFields));
 
         for (DataSection section : _headerSections) {
             if (section != null) {

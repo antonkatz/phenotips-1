@@ -55,5 +55,5 @@ public class APGARController extends AbstractSimpleController
         list.add("apgar1");
         list.add("apgar5");
         return list;
-    }
+     }
 }
