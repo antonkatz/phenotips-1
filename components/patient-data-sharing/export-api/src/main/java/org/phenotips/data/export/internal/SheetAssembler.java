@@ -135,7 +135,7 @@ public class SheetAssembler
                 cell.setX(cell.getX() + offset);
                 combinedSection.addCell(cell);
             }
-            offset = section.getMaxX() + 1;
+            offset = combinedSection.getMaxX() + 1;
         }
         if (finalize) {
             combinedSection.finalizeToMatrix();
@@ -155,7 +155,7 @@ public class SheetAssembler
                 cell.setY(cell.getY() + offset);
                 combinedSection.addCell(cell);
             }
-            offset += section.getMaxY() + 1;
+            offset += combinedSection.getMaxY() + 1;
         }
         if (finalize) {
             combinedSection.finalizeToMatrix();

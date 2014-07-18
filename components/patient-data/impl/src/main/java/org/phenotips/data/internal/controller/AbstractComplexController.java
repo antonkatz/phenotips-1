@@ -61,7 +61,7 @@ public abstract class AbstractComplexController<T> implements PatientDataControl
 
     /** Logging helper object. */
     @Inject
-    private Logger logger;
+    protected Logger logger;
 
     @Override
     public PatientData<T> load(Patient patient)

@@ -21,6 +21,7 @@ package org.phenotips.data.export.internal;
 
 import org.phenotips.data.Feature;
 import org.phenotips.data.FeatureMetadatum;
+import org.phenotips.data.OntologyProperty;
 import org.phenotips.data.Patient;
 import org.phenotips.data.PatientData;
 import org.phenotips.ontology.internal.solr.SolrOntologyTerm;
@@ -50,20 +51,18 @@ public class DataToCellConverter
 
     private ConversionHelpers phenotypeHelper;
 
-    private ConversionHelpers prenatalPhenotypeHelper;
-
     public static final Integer charactersPerLine = 100;
 
     public void phenotypeSetup(Set<String> enabledFields) throws Exception
     {
         String sectionName = "phenotype";
         String[] fieldIds =
-            { "phenotype", "phenotype_code", "phenotype_combined", "phenotype_code_meta", "phenotype_meta",
-                "negative_phenotype", "phenotype_by_section" };
+            {"phenotype", "phenotype_code", "phenotype_combined", "phenotype_code_meta", "phenotype_meta",
+                "negative_phenotype", "phenotype_by_section"};
         /* FIXME These will not work properly in different configurations */
         String[][] headerIds =
-            { { "phenotype" }, { "code" }, { "phenotype", "code" }, { "meta_code" }, { "meta" }, { "negative" },
-                { "category" } };
+            {{"phenotype"}, {"code"}, {"phenotype", "code"}, {"meta_code"}, {"meta"}, {"negative"},
+                {"category"}};
         Set<String> present = new HashSet<String>();
 
         int counter = 0;
@@ -545,12 +544,10 @@ public class DataToCellConverter
     public void prenatalPhenotypeSetup(Set<String> enabledFields) throws Exception
     {
         String sectionName = "prenatalPhenotype";
-        String[] fieldIds =
-            { "prenatal_phenotype", "prenatal_phenotype_code", "prenatal_phenotype_combined",
-                "negative_prenatal__phenotype", "prenatal_phenotype_by_section" };
+        String[] fieldIds = {"prenatal_phenotype", "prenatal_phenotype_code", "prenatal_phenotype_combined",
+            "negative_prenatal_phenotype"};
         /* FIXME These will not work properly in different configurations */
-        String[][] headerIds =
-            { { "phenotype" }, { "code" }, { "phenotype", "code" }, { "negative" }, { "category" } };
+        String[][] headerIds = {{"phenotype"}, {"code"}, {"phenotype", "code"}, {"negative"}};
         Set<String> present = new HashSet<String>();
 
         int counter = 0;
@@ -563,13 +560,7 @@ public class DataToCellConverter
             counter++;
         }
         enabledHeaderIdsBySection.put(sectionName, present);
-
-        /* Needed for ordering phenotypes */
-        prenatalPhenotypeHelper = new ConversionHelpers();
-        prenatalPhenotypeHelper
-            .featureSetUp(present.contains("phenotype"), present.contains("negative"), present.contains("category"));
     }
-
 
     public DataSection prenatalPhenotypeHeader() throws Exception
     {
@@ -581,16 +572,10 @@ public class DataToCellConverter
 
         DataSection section = new DataSection(sectionName);
         List<String> orderedHeaderIds = new LinkedList<String>();
-        orderedHeaderIds.add("category");
         orderedHeaderIds.add("phenotype");
         orderedHeaderIds.add("code");
-        orderedHeaderIds.add("meta");
-        orderedHeaderIds.add("meta_code");
         List<String> orderedHeaderNames = new LinkedList<String>();
-        orderedHeaderNames.add("Category");
         orderedHeaderNames.add("Label");
-        orderedHeaderNames.add("ID");
-        orderedHeaderNames.add("Meta");
         orderedHeaderNames.add("ID");
 
         int counter = 0;
@@ -626,84 +611,44 @@ public class DataToCellConverter
         }
 
         Boolean bothTypes = present.contains("phenotype") && present.contains("negative");
-        DataSection section = new DataSection(sectionName);
+        DataSection bodySection = new DataSection(sectionName);
 
         int x;
         int y = 0;
-        Set<? extends Feature> features = patient.getFeatures();
-        phenotypeHelper.newPatient();
-        Boolean categoriesEnabled = present.contains("category");
-        List<Feature> sortedFeatures;
-        Map<String, String> sectionFeatureLookup = new HashMap<String, String>();
-        if (!categoriesEnabled) {
-            sortedFeatures = phenotypeHelper.sortFeaturesSimple(features);
-        } else {
-            sortedFeatures = phenotypeHelper.sortFeaturesWithSections(features);
-            sectionFeatureLookup = phenotypeHelper.getSectionFeatureTree();
+        PatientData<List<OntologyProperty>> phenotype = patient.getData("prenatalPerinatalPhenotype");
+        Map<Boolean, List<OntologyProperty>> sortedPhenotype = new HashMap<Boolean, List<OntologyProperty>>();
+        if (present.contains("phenotype")) {
+            sortedPhenotype.put(true, phenotype.get("prenatal_phenotype"));
+        }
+        if (present.contains("negative")) {
+            sortedPhenotype.put(false, phenotype.get("negative_prenatal_phenotype"));
         }
 
-        Boolean lastStatus = false;
-        String lastSection = "";
-        for (Feature feature : sortedFeatures) {
-            x = 0;
+        for (Map.Entry<Boolean, List<OntologyProperty>> phenotypeList : sortedPhenotype.entrySet()) {
+            for (OntologyProperty feature : phenotypeList.getValue()) {
+                x = 0;
 
-            if (bothTypes && lastStatus != feature.isPresent()) {
-                lastStatus = feature.isPresent();
-                lastSection = "";
-                DataCell cell = new DataCell(lastStatus ? "Yes" : "No", x, y);
-                if (!lastStatus) {
-                    cell.addStyle(StyleOption.YES_NO_SEPARATOR);
+                if (bothTypes) {
+                    Boolean status = phenotypeList.getKey();
+                    DataCell cell = new DataCell(status ? "Yes" : "No", x, y);
+                    cell.addStyle(status ? StyleOption.YES : StyleOption.NO);
+                    bodySection.addCell(cell);
+                    x++;
                 }
-                cell.addStyle(lastStatus ? StyleOption.YES : StyleOption.NO);
-                section.addCell(cell);
-            }
-            if (bothTypes) {
-                x++;
-            }
-            if (categoriesEnabled) {
-                String currentSection = sectionFeatureLookup.get(feature.getId());
-                if (!StringUtils.equals(currentSection, lastSection)) {
-                    DataCell cell = new DataCell(currentSection, x, y);
-                    section.addCell(cell);
-                    lastSection = currentSection;
+                if (present.contains("phenotype")) {
+                    DataCell cell = new DataCell(feature.getName(), x, y, StyleOption.FEATURE_SEPARATOR);
+                    bodySection.addCell(cell);
+                    x++;
                 }
-                x++;
-            }
-            if (present.contains("phenotype")) {
-                DataCell cell = new DataCell(feature.getName(), x, y, StyleOption.FEATURE_SEPARATOR);
-                section.addCell(cell);
-                x++;
-            }
-            if (present.contains("code")) {
-                DataCell cell = new DataCell(feature.getId(), x, y, StyleOption.FEATURE_SEPARATOR);
-                section.addCell(cell);
-                x++;
-            }
-            if (present.contains("meta") || present.contains("meta_code")) {
-                int mX = x;
-                int mCX = x + 1;
-                Collection<? extends FeatureMetadatum> featureMetadatum = feature.getMetadata().values();
-                Boolean metaPresent = featureMetadatum.size() > 0;
-                for (FeatureMetadatum meta : featureMetadatum) {
-                    if (present.contains("meta")) {
-                        DataCell cell = new DataCell(meta.getName(), mX, y);
-                        section.addCell(cell);
-                    }
-                    if (present.contains("meta_code")) {
-                        DataCell cell = new DataCell(meta.getId(), mCX, y);
-                        section.addCell(cell);
-                    }
-                    y++;
+                if (present.contains("code")) {
+                    DataCell cell = new DataCell(feature.getId(), x, y, StyleOption.FEATURE_SEPARATOR);
+                    bodySection.addCell(cell);
+                    x++;
                 }
-                if (metaPresent) {
-                    y--;
-                }
+                y++;
             }
-            y++;
         }
 
-//        section.finalizeToMatrix();
-        return section;
+        return bodySection;
     }
-
 }
