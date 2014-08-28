@@ -26,6 +26,8 @@ REM -----------------
 REM   START_OPTS - parameters passed to the Java VM when running Jetty
 REM     e.g. to increase the memory allocated to the JVM to 1GB, use
 REM       set START_OPTS=-Xmx1024m
+REM   JETTY_PORT - the port on which to start Jetty, 8080 by default
+REM   JETTY_STOP_PORT - the port on which Jetty listens for a Stop command, 8079 by default
 REM -------------------------------------------------------------------------
 
 setlocal EnableDelayedExpansion
@@ -33,14 +35,18 @@ setlocal EnableDelayedExpansion
 set JETTY_HOME=jetty
 if not defined START_OPTS set START_OPTS=-Xmx512m -XX:MaxPermSize=192m
 
+REM The port on which to start Jetty can be defined in an enviroment variable called JETTY_PORT
 if not defined JETTY_PORT (
+  REM Alternatively, it can be passed to this script as the first argument
   set JETTY_PORT=%1
   if not defined JETTY_PORT (
     set JETTY_PORT=8080
   )
 )
 
+REM The port on which Jetty listens for a Stop command can be defined in an enviroment variable called JETTY_STOP_PORT
 if not defined JETTY_STOP_PORT (
+  REM Alternatively, it can be passed to this script as the second argument
   set JETTY_STOP_PORT=%2
   if not defined JETTY_STOP_PORT (
     set JETTY_STOP_PORT=8079
@@ -48,6 +54,11 @@ if not defined JETTY_STOP_PORT (
 )
 
 echo Starting Jetty on port %JETTY_PORT%, please wait...
+
+REM Get javaw.exe from the latest properly installed JRE
+for /f tokens^=2^ delims^=^" %%i in ('reg query HKEY_CLASSES_ROOT\jarfile\shell\open\command /ve') do set JAVAW_PATH=%%i
+set JAVA_PATH=%JAVAW_PATH:\javaw.exe=%\java.exe
+if "%JAVA_PATH%"=="" set JAVA_PATH=java
 
 REM Location where XWiki stores generated data and where database files are.
 set XWIKI_DATA_DIR=data
@@ -74,9 +85,6 @@ set START_OPTS=%START_OPTS% -DSTOP.KEY=xwiki -DSTOP.PORT=%JETTY_STOP_PORT%
 REM Specify the encoding to use
 set START_OPTS=%START_OPTS% -Dfile.encoding=UTF8
 
-REM Path to the solr configuration
-set START_OPTS=%START_OPTS% -Dsolr.solr.home=solrconfig
-
 REM In order to avoid getting a "java.lang.IllegalStateException: Form too large" error
 REM when editing large page in XWiki we need to tell Jetty to allow for large content
 REM since by default it only allows for 20K. We do this by passing the
@@ -88,4 +96,8 @@ set START_OPTS=%START_OPTS% -Dorg.eclipse.jetty.server.Request.maxFormContentSiz
 set JETTY_CONFIGURATION_FILES=
 for /r %%i in (%JETTY_HOME%\etc\jetty-*.xml) do set JETTY_CONFIGURATION_FILES=!JETTY_CONFIGURATION_FILES! "%%i"
 
-java %START_OPTS% %3 %4 %5 %6 %7 %8 %9 -jar %JETTY_HOME%/start.jar %JETTY_HOME%/etc/jetty.xml %JETTY_CONFIGURATION_FILES%
+"%JAVA_PATH%" %START_OPTS% %3 %4 %5 %6 %7 %8 %9 -jar %JETTY_HOME%/start.jar %JETTY_HOME%/etc/jetty.xml %JETTY_CONFIGURATION_FILES%
+
+REM Pause so that the command window used to run this script doesn't close automatically in case of problem
+REM (like when the JDK/JRE is not installed)
+PAUSE

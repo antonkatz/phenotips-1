@@ -19,6 +19,7 @@
  */
 package org.phenotips.data.internal.controller;
 
+import org.phenotips.data.OntologyProperty;
 import org.phenotips.data.PatientDataController;
 
 import org.xwiki.component.annotation.Component;
@@ -32,15 +33,18 @@ import javax.inject.Singleton;
 
 /**
  * Handles the information found in the family history section of the patient record.
+ *
+ * @version $Id$
+ * @since 1.0RC1
  */
-@Component(roles = {PatientDataController.class})
+@Component(roles = { PatientDataController.class })
 @Named("prenatalPhenotype")
 @Singleton
 public class PrenatalPhenotypeController extends AbstractComplexController<List<OntologyProperty>>
 {
-    final static String PRENATAL_PHENOTYPE = "prenatal_phenotype";
+    private static final String PRENATAL_PHENOTYPE = "prenatal_phenotype";
 
-    final static String NEGATIVE_PRENATAL_PHENOTYPE = "negative_prenatal_phenotype";
+    private static final String NEGATIVE_PRENATAL_PHENOTYPE = "negative_prenatal_phenotype";
 
     private List<String> hpoCodes = Arrays.asList(PRENATAL_PHENOTYPE, NEGATIVE_PRENATAL_PHENOTYPE);
 
@@ -65,17 +69,18 @@ public class PrenatalPhenotypeController extends AbstractComplexController<List<
     @Override
     protected List<String> getBooleanFields()
     {
-        return new LinkedList<String>();
+        return new LinkedList<>();
     }
 
     @Override
     protected List<String> getCodeFields()
     {
-        return hpoCodes;
+        return this.hpoCodes;
     }
 
     @Override
-    protected Boolean isCodeFieldsOnly() {
+    protected boolean isCodeFieldsOnly()
+    {
         return true;
     }
 }
