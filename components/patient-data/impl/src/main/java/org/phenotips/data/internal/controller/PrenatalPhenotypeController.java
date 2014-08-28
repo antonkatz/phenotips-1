@@ -36,7 +36,7 @@ import javax.inject.Singleton;
 @Component(roles = {PatientDataController.class})
 @Named("prenatalPhenotype")
 @Singleton
-public class PrenatalPhenotypeController extends AbstractComplexController<List<String>>
+public class PrenatalPhenotypeController extends AbstractComplexController<List<OntologyProperty>>
 {
     final static String PRENATAL_PHENOTYPE = "prenatal_phenotype";
 
@@ -53,7 +53,7 @@ public class PrenatalPhenotypeController extends AbstractComplexController<List<
     @Override
     protected String getJsonPropertyName()
     {
-        return "prenatal_perinatal_history";
+        return "prenatal_perinatal_phenotype";
     }
 
     @Override
@@ -72,5 +72,10 @@ public class PrenatalPhenotypeController extends AbstractComplexController<List<
     protected List<String> getCodeFields()
     {
         return hpoCodes;
+    }
+
+    @Override
+    protected Boolean isCodeFieldsOnly() {
+        return true;
     }
 }

@@ -191,4 +191,31 @@ public class ConversionHelpers
         }
         return returnString.toString();
     }
+
+    public static String strIntegerToStrBool(String strInt)
+    {
+        if (StringUtils.equals("0", strInt)) {
+            return "No";
+        } else if (StringUtils.equals("1", strInt)) {
+            return "Yes";
+        } else if (StringUtils.equals("", strInt)) {
+            return "";
+        } else {
+            return "N/A";
+        }
+    }
+
+    public static String integerToStrBool(Integer integer)
+    {
+        if (integer == null) {
+            return "";
+        }
+        if (integer == 0) {
+            return "No";
+        } else if (integer == 1) {
+            return "Yes";
+        } else {
+            return "N/A";
+        }
+    }
 }
