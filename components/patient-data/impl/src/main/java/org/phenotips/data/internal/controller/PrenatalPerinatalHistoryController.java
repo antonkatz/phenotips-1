@@ -50,7 +50,7 @@ public class PrenatalPerinatalHistoryController extends AbstractComplexControlle
     @Override
     public String getName()
     {
-        return "PrenatalPerinatalHistory";
+        return "prenatalPerinatalHistory";
     }
 
     @Override

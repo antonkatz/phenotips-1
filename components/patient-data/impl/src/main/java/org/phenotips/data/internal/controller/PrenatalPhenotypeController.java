@@ -47,7 +47,7 @@ public class PrenatalPhenotypeController extends AbstractComplexController<List<
     @Override
     public String getName()
     {
-        return "PrenatalPerinatalHistory";
+        return "prenatalPerinatalPhenotype";
     }
 
     @Override
@@ -59,7 +59,7 @@ public class PrenatalPhenotypeController extends AbstractComplexController<List<
     @Override
     protected List<String> getProperties()
     {
-        return Arrays.asList("gestation", PRENATAL_PHENOTYPE, NEGATIVE_PRENATAL_PHENOTYPE);
+        return Arrays.asList(PRENATAL_PHENOTYPE, NEGATIVE_PRENATAL_PHENOTYPE);
     }
 
     @Override

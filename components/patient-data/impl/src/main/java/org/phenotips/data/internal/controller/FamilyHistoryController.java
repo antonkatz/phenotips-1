@@ -36,7 +36,7 @@ import javax.inject.Singleton;
 @Component(roles = {PatientDataController.class})
 @Named("familyHistory")
 @Singleton
-public class FamilyHistoryController extends AbstractComplexController<String>
+public class FamilyHistoryController extends AbstractComplexController<Integer>
 {
     final static String CONSANGUINITY = "consanguinity";
 
@@ -59,7 +59,7 @@ public class FamilyHistoryController extends AbstractComplexController<String>
     @Override
     protected List<String> getProperties()
     {
-        return Arrays.asList("maternal_ethnicity", "paternal_ethnicity", CONSANGUINITY, MISCARRIAGES);
+        return Arrays.asList(CONSANGUINITY, MISCARRIAGES);
     }
 
     @Override
